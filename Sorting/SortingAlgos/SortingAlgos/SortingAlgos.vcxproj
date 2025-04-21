@@ -128,11 +128,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Fileloader.cpp" />
+    <ClCompile Include="Sorter.cpp" />
     <ClCompile Include="SortingAlgos.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Fileloader.h" />
+    <ClInclude Include="Sorter.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
