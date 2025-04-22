@@ -1,13 +1,25 @@
 #include "Sorter.h"
+#include <iostream>
 
-Sorter::Sorter(std::vector<int> data) : arr(std::move(data)) {}
+Sorter::Sorter(int* data, int size) {
+    this->arr = data;
+    this->size = size;
+}
 
-std::vector<int> Sorter::getArray() {
-    return arr;
+void Sorter::printArray() {
+    for (int i = 0; i < size; ++i)
+        std::cout << arr[i] << " ";
+    std::cout << std::endl;
+}
+
+void Sorter::swap(int& a, int& b) {
+    int temp = a;
+    a = b;
+    b = temp;
 }
 
 void Sorter::insertionSort() {
-    for (size_t i = 1; i < arr.size(); ++i) {
+    for (int i = 1; i < size; ++i) {
         int key = arr[i];
         int j = i - 1;
         while (j >= 0 && arr[j] > key) {
@@ -19,7 +31,7 @@ void Sorter::insertionSort() {
 }
 
 void Sorter::binaryInsertionSort() {
-    for (size_t i = 1; i < arr.size(); ++i) {
+    for (int i = 1; i < size; ++i) {
         int key = arr[i];
         int left = 0;
         int right = i - 1;
@@ -40,47 +52,34 @@ void Sorter::binaryInsertionSort() {
 }
 
 void Sorter::heapSort() {
-    int n = arr.size();
+    for (int i = size / 2 - 1; i >= 0; --i)
+        heapify(size, i);
 
-    // Build max heap (heapify from bottom-up)
-    for (int i = n / 2 - 1; i >= 0; --i)
-        heapify(n, i);
-
-    // Extract elements from heap one by one
-    for (int i = n - 1; i > 0; --i) {
-        swap(arr[0], arr[i]); // Move current root to end
-        heapify(i, 0); // Heapify reduced heap
+    for (int i = size - 1; i > 0; --i) {
+        swap(arr[0], arr[i]);
+        heapify(i, 0);
     }
 }
 
 void Sorter::heapify(int n, int i) {
-    int largest = i;       // Initialize largest as root
-    int left = 2 * i + 1;  // left child
-    int right = 2 * i + 2; // right child
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
 
-    // If left child is larger than root
     if (left < n && arr[left] > arr[largest])
         largest = left;
 
-    // If right child is larger than largest so far
     if (right < n && arr[right] > arr[largest])
         largest = right;
 
-    // If largest is not root
     if (largest != i) {
         swap(arr[i], arr[largest]);
-        heapify(n, largest); // Recursively heapify the affected sub-tree
+        heapify(n, largest);
     }
 }
 
-void Sorter::swap(int& a, int& b) {
-    int temp = a;
-    a = b;
-    b = temp;
-}
-
 void Sorter::quickSort() {
-    quickSortHelper(0, arr.size() - 1);
+    quickSortHelper(0, size - 1);
 }
 
 void Sorter::quickSortHelper(int low, int high) {
@@ -94,12 +93,13 @@ void Sorter::quickSortHelper(int low, int high) {
 int Sorter::partition(int low, int high) {
     int pivot = arr[high];
     int i = low - 1;
+
     for (int j = low; j < high; ++j) {
         if (arr[j] <= pivot) {
             ++i;
-            std::swap(arr[i], arr[j]);
+            swap(arr[i], arr[j]);
         }
     }
-    std::swap(arr[i + 1], arr[high]);
+    swap(arr[i + 1], arr[high]);
     return i + 1;
 }

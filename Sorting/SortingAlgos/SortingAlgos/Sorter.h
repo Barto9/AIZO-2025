@@ -2,20 +2,18 @@
 #ifndef SORTER_H
 #define SORTER_H
 
-#include <vector>
-
 class Sorter {
 public:
-    Sorter(std::vector<int> data);
+    Sorter(int* data, int size);
     void insertionSort();
     void binaryInsertionSort();
     void heapSort(); // Now implemented from scratch
     void quickSort();
-    std::vector<int> getArray();
+    void printArray();
 
 private:
-    std::vector<int> arr;
-
+     int* arr;
+     int size;
     // Helpers
     void quickSortHelper(int low, int high);
     int partition(int low, int high);
