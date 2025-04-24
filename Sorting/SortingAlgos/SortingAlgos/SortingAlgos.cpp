@@ -8,7 +8,7 @@ void showHelp() {
     std::cout << "FILE TEST MODE:\n"
         << "Usage:\n"
         << "./YourProject --file <algorithm> <type> <inputFile> [outputFile]\n"
-        << "<algorithm> Sorting algorithm to use (e.g., 0 - Inserion, 1 - InsertionBinary, 2 - Insertion, 3 - Heapsort, 4 - Quicksort).\n"
+        << "<algorithm> Sorting algorithm to use (e.g., 1 - InsertionBinary, 2 - Insertion, 3 - Heapsort, 4 - Quicksort).\n"
         << "<type> Data type to load (0 - int only for now).\n"
         << "<inputFile> Input file containing the data to be sorted.\n"
         << "[outputFile] If provided, the sorted values will be saved to this file.\n\n"
@@ -27,6 +27,9 @@ void showHelp() {
 
 void runSort(Sorter& sorter, int algorithm) {
     switch (algorithm) {
+    case 1:
+		sorter.binaryInsertionSort();
+		break;
     case 2:
         sorter.insertionSort();
         break;
@@ -66,12 +69,13 @@ int main(int argc, char* argv[]) {
 
         Timer timer;
         Sorter sorter(loader.array, loader.size);
+        timer.start();
         runSort(sorter, algorithm);
-        timer.Stop();
+        timer.stop();
 
         std::cout << "Sorted array:\n";
         sorter.printArray();
-        std::cout << "Time elapsed: " << timer.GetElapsedMilliseconds() << " ms\n";
+        std::cout << "Time elapsed: " << timer.result() << " ms\n";
 
         if (!outputFile.empty()) {
             loader.SaveToFile(outputFile);
@@ -96,8 +100,9 @@ int main(int argc, char* argv[]) {
 
         Sorter sorter(data, size);
         Timer timer;
+        timer.start();
         runSort(sorter, algorithm);
-        timer.Stop();
+        timer.stop();
 
         std::ofstream out(outputFile);
         if (!out) {
@@ -106,7 +111,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        out << "Sorted " << size << " elements in " << timer.GetElapsedMilliseconds() << " ms\n";
+        out << "Sorted " << size << " elements in " << timer.result() << " ms\n";
         for (int i = 0; i < size; ++i)
             out << data[i] << " ";
         out << std::endl;
