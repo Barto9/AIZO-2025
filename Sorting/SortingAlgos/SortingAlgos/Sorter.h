@@ -1,7 +1,4 @@
 #pragma once
-#ifndef SORTER_H
-#define SORTER_H
-
 class Sorter {
 public:
     Sorter(int* data, int size);
@@ -22,5 +19,3 @@ private:
     void heapify(int n, int i);
     void swap(int& a, int& b);
 };
-
-#endif // SORTER_H

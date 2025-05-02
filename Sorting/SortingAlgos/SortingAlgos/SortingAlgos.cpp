@@ -3,25 +3,29 @@
 #include "Timer.h"
 #include "Fileloader.h"
 #include "Sorter.h"
+#include "AutoTest.h"
 
 void showHelp() {
     std::cout << "FILE TEST MODE:\n"
         << "Usage:\n"
-        << "./YourProject --file <algorithm> <type> <inputFile> [outputFile]\n"
+        << "./SortingAlgos --file <algorithm> <type> <inputFile> [outputFile]\n"
         << "<algorithm> Sorting algorithm to use (e.g., 1 - InsertionBinary, 2 - Insertion, 3 - Heapsort, 4 - Quicksort).\n"
         << "<type> Data type to load (0 - int only for now).\n"
         << "<inputFile> Input file containing the data to be sorted.\n"
         << "[outputFile] If provided, the sorted values will be saved to this file.\n\n"
         << "BENCHMARK MODE:\n"
         << "Usage:\n"
-        << "./YourProject --test <algorithm> <type> <size> <outputFile>\n"
+        << "./SortingAlgos --test <algorithm> <type> <size> <outputFile>\n"
         << "<algorithm> Sorting algorithm to use.\n"
         << "<type> Data type to generate (0 - int only for now).\n"
         << "<size> Number of elements to generate.\n"
         << "<outputFile> File where the benchmark results will be saved.\n\n"
+        << "BATCH BENCHMARK:\n"
+        << "./SortingAlgos --batchtest <algorithm> <minSize> <maxSize> <step> <outputFile>\n"
+        << "Runs tests for multiple sizes.\n\n"
         << "HELP MODE:\n"
         << "Usage:\n"
-        << "./YourProject --help\n"
+        << "./SortingAlgos --help\n"
         << "Displays this help message.\n";
 }
 
@@ -119,6 +123,16 @@ int main(int argc, char* argv[]) {
         delete[] data;
         std::cout << "Benchmark complete. Results saved to " << outputFile << "\n";
 
+    }
+    else if (mode == "--batchtest" && argc == 7) {
+        int algorithm = std::stoi(argv[2]);
+        int minSize = std::stoi(argv[3]);
+        int maxSize = std::stoi(argv[4]);
+        int step = std::stoi(argv[5]);
+        std::string outFile = argv[6];
+
+        AutoTest test;
+        test.RunBatch(algorithm, minSize, maxSize, step, outFile);
     }
     else {
         showHelp();

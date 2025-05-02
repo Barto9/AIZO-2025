@@ -127,12 +127,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AutoTest.cpp" />
     <ClCompile Include="Fileloader.cpp" />
     <ClCompile Include="Sorter.cpp" />
     <ClCompile Include="SortingAlgos.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AutoTest.h" />
     <ClInclude Include="Fileloader.h" />
     <ClInclude Include="Sorter.h" />
     <ClInclude Include="Timer.h" />
