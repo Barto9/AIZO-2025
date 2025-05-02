@@ -4,13 +4,11 @@
 class AutoTest {
 public:
     AutoTest();
-    ~AutoTest();
-
-    void RunTest(int algorithm, int size, const std::string& outputFile);
-    void RunBatch(int algorithm, int minSize, int maxSize, int stepSize, const std::string& outputFile);
+    void RunBatch(int algorithm, int poolSize, int arraySize, const std::string& summaryFile);
 
 private:
     int* generateArray(int size);
-    void saveResults(const std::string& filename, int size, double timeMs, int algorithm);
+    double runSingleTest(int algorithm, int* data, int size);
+    void saveResults(const std::string& summaryFile, const std::string& detailFile,
+        int size, double avgTimeMs, int algorithm, int poolSize, double* times);
 };
-
