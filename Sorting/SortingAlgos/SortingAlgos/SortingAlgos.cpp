@@ -15,7 +15,7 @@ void showHelp() {
         << "[outputFile] If provided, the sorted values will be saved to this file.\n\n"
         << "BENCHMARK MODE:\n"
         << "Usage:\n"
-        << "./SortingAlgos --test <algorithm> <type> <size> <outputFile>\n"
+        << "./SortingAlgos --test <algorithm> <type> <poolsize> <arraysize> <outputFile>\n"
         << "<algorithm> Sorting algorithm to use.\n"
         << "<type> Data type to generate (0 - int only for now).\n"
         << "<size> Number of elements to generate.\n"
