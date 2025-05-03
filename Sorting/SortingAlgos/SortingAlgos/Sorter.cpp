@@ -6,6 +6,26 @@ Sorter::Sorter(int* data, int size) {
     this->size = size;
 }
 
+void Sorter::runSort( int algorithm) {
+    switch (algorithm) {
+    case 1:
+        binaryInsertionSort();
+        break;
+    case 2:
+        insertionSort();
+        break;
+    case 3:
+        quickSort();
+        break;
+    case 4:
+        heapSort();
+        break;
+    default:
+        std::cerr << "Algorithm not implemented.\n";
+        exit(1);
+    }
+}
+
 void Sorter::printArray() {
     for (int i = 0; i < size; ++i)
         std::cout << arr[i] << " ";

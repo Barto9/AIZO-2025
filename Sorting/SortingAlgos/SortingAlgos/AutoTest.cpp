@@ -25,17 +25,8 @@ double AutoTest::runSingleTest(int algorithm, int* data, int size) {
 
     Sorter sorter(arrCopy, size);
     Timer timer;
-
-    switch (algorithm) {
-    case 2: sorter.insertionSort(); break;
-    case 3: sorter.quickSort(); break;
-    case 4: sorter.heapSort(); break;
-    default:
-        std::cerr << "Unsupported algorithm.\n";
-        delete[] arrCopy;
-        return -1;
-    }
-
+    timer.start();
+    sorter.runSort(algorithm);
     timer.stop();
     double elapsed = timer.result();
     delete[] arrCopy;

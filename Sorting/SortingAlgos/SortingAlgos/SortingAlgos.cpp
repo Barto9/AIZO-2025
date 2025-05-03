@@ -15,38 +15,18 @@ void showHelp() {
         << "[outputFile] If provided, the sorted values will be saved to this file.\n\n"
         << "BENCHMARK MODE:\n"
         << "Usage:\n"
-        << "./SortingAlgos --test <algorithm> <type> <poolsize> <arraysize> <outputFile>\n"
+        << "./SortingAlgos --test <algorithm> <type> <arraysize> <outputFile>\n"
         << "<algorithm> Sorting algorithm to use.\n"
         << "<type> Data type to generate (0 - int only for now).\n"
         << "<size> Number of elements to generate.\n"
         << "<outputFile> File where the benchmark results will be saved.\n\n"
         << "BATCH BENCHMARK:\n"
-        << "./SortingAlgos --batchtest <algorithm> <type> <poolSize> <size> <outpusFile>\n"
+        << "./SortingAlgos --batchtest <algorithm> <type> <poolSize> <size> <outputFile>\n"
         << "Runs tests for multiple sizes.\n\n"
         << "HELP MODE:\n"
         << "Usage:\n"
         << "./SortingAlgos --help\n"
         << "Displays this help message.\n";
-}
-
-void runSort(Sorter& sorter, int algorithm) {
-    switch (algorithm) {
-    case 1:
-		sorter.binaryInsertionSort();
-		break;
-    case 2:
-        sorter.insertionSort();
-        break;
-    case 3:
-        sorter.quickSort();
-        break;
-    case 4:
-        sorter.heapSort();
-        break;
-    default:
-        std::cerr << "Algorithm not implemented.\n";
-        exit(1);
-    }
 }
 
 int main(int argc, char* argv[]) {
@@ -74,7 +54,7 @@ int main(int argc, char* argv[]) {
         Timer timer;
         Sorter sorter(loader.array, loader.size);
         timer.start();
-        runSort(sorter, algorithm);
+        sorter.runSort( algorithm);
         timer.stop();
 
         std::cout << "Sorted array:\n";
@@ -100,12 +80,12 @@ int main(int argc, char* argv[]) {
         int* data = new int[size];
         srand(static_cast<unsigned>(time(nullptr)));
         for (int i = 0; i < size; ++i)
-            data[i] = rand() % 100000;
+            data[i] = rand();
 
         Sorter sorter(data, size);
         Timer timer;
         timer.start();
-        runSort(sorter, algorithm);
+        sorter.runSort(algorithm);
         timer.stop();
 
         std::ofstream out(outputFile);

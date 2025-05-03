@@ -2,6 +2,7 @@
 class Sorter {
 public:
     Sorter(int* data, int size);
+    void runSort(int algorithm);
     void insertionSort();
     void binaryInsertionSort();
     void heapSort(); // Now implemented from scratch

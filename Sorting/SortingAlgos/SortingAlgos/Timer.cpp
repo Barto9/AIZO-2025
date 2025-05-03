@@ -26,7 +26,8 @@ int Timer::stop() {
 
 int Timer::result() {
     if (!running) {
-        return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+        return static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count());
+
     }
     return -1; // Timer is still running
 }
