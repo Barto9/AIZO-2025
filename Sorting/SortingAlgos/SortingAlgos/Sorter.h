@@ -23,3 +23,27 @@ private:
     void heapify(int n, int i);
     void swap(int& a, int& b);
 };
+
+class SorterFloat {
+public:
+    SorterFloat(float* data, int size);
+    void quickSort();
+private:
+    float* arr;
+    int size;
+    void quickSortHelper(int low, int high);
+    int partition(int low, int high);
+    void swap(float& a, float& b);
+};
+
+class SorterLong {
+public:
+    SorterLong(long long* data, int size);
+    void quickSort();
+private:
+    long long* arr;
+    int size;
+    void quickSortHelper(int low, int high);
+    int partition(int low, int high);
+    void swap(long long& a, long long& b);
+};

@@ -5,6 +5,8 @@ Sorter::Sorter(int* data, int size) {
     this->arr = data;
     this->size = size;
 }
+SorterFloat::SorterFloat(float* data, int size) : arr(data), size(size) {}
+SorterLong::SorterLong(long long* data, int size) : arr(data), size(size) {}
 
 void Sorter::runSort( int algorithm) {
     switch (algorithm) {
@@ -30,12 +32,6 @@ void Sorter::printArray() {
     for (int i = 0; i < size; ++i)
         std::cout << arr[i] << " ";
     std::cout << std::endl;
-}
-
-void Sorter::swap(int& a, int& b) {
-    int temp = a;
-    a = b;
-    b = temp;
 }
 
 void Sorter::insertionSort() {
@@ -165,4 +161,72 @@ int Sorter::partition(int low, int high) {
     }
     swap(arr[i + 1], arr[high]);
     return i + 1;
+}
+
+void Sorter::swap(int& a, int& b) {
+    int temp = a;
+    a = b;
+    b = temp;
+}
+//float part bcs im stupid
+void SorterFloat::quickSort() {
+    quickSortHelper(0, size - 1);
+}
+
+void SorterFloat::quickSortHelper(int low, int high) {
+    if (low < high) {
+        int pi = partition(low, high);
+        quickSortHelper(low, pi - 1);
+        quickSortHelper(pi + 1, high);
+    }
+}
+
+int SorterFloat::partition(int low, int high) {
+    float pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; ++j) {
+        if (arr[j] <= pivot) {
+            ++i;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+void SorterFloat::swap(float& a, float& b) {
+    float temp = a;
+    a = b;
+    b = temp;
+}
+//long long part bcs im stupider
+void SorterLong::quickSort() {
+    quickSortHelper(0, size - 1);
+}
+
+void SorterLong::quickSortHelper(int low, int high) {
+    if (low < high) {
+        int pi = partition(low, high);
+        quickSortHelper(low, pi - 1);
+        quickSortHelper(pi + 1, high);
+    }
+}
+
+int SorterLong::partition(int low, int high) {
+    long long pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; ++j) {
+        if (arr[j] <= pivot) {
+            ++i;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+void SorterLong::swap(long long& a, long long& b) {
+    long long temp = a;
+    a = b;
+    b = temp;
 }

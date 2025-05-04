@@ -23,7 +23,8 @@ void showHelp() {
         << "BATCH BENCHMARK:\n"
         << "./SortingAlgos --batchtest <algorithm> <type> <poolSize> <size> <ditributionType> <outputFile>\n"
         << "<distributionType> ( 1 - sorted ascending, 2 - sorted descending, 3 - sorted 33% of the way, 4 - sorted 66% of the way, anything else - random distribution\n"
-        << "Runs tests for multiple sizes.\n\n"
+        << "Runs tests for multiple sizes. IMPORTANT, THIS IS THE ONLY MODE THAT ACCEPTS NOT ONLY INT!!!\n"
+        << "Quicksort (4) algorythm also accepts float (1) and long long int (2) types.\n\n"
         << "DRUNK MODE:\n"
         << "You are playing bridge with your friends, but you are drunk out of your ass.\n"
         << "Every time you pick up a card there is d% chance (where d is drunkness % 101)\n"
@@ -79,7 +80,7 @@ int main(int argc, char* argv[]) {
         std::string outputFile = argv[5];
 
         if (type != 0) {
-            std::cerr << "Only int (type 0) is supported for now.\n";
+            std::cerr << "Only int implemented\n";
             return 1;
         }
 
@@ -118,13 +119,29 @@ int main(int argc, char* argv[]) {
         int distrType = std::stoi(argv[6]);
         std::string outFile = argv[7];
 
-        if (type != 0) {
-            std::cerr << "Only int type (0) is supported in batch test mode.\n";
+        if (type != 0 && algorithm != 4) {
+            std::cerr << "Only Quicksort has other data types implemented\n";
             return 1;
         }
-
         AutoTest test;
-        test.RunBatch(algorithm, poolSize, arraySize,distrType, outFile);
+        AutoTestFloat testF;
+        AutoTestLong testL;
+        switch (type)
+        {
+        case 0:
+            
+            test.RunBatch(algorithm, poolSize, arraySize, distrType, outFile);
+            break;
+        case 1:
+            
+            testF.RunBatchFloat(poolSize, arraySize, outFile);
+        case 2:
+            
+            testL.RunBatchLong(poolSize, arraySize, outFile);
+        default:
+            break;
+        }
+        
     }
     else if (mode == "--drunk" && argc == 7) {
         int drunkness = std::stoi(argv[2]);
