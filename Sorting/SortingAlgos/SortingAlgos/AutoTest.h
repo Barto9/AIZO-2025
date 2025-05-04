@@ -4,7 +4,7 @@
 class AutoTest {
 public:
     AutoTest();
-    void RunBatch(int algorithm, int poolSize, int arraySize, const std::string& summaryFile);
+    void RunBatch(int algorithm, int poolSize, int arraySize, int distrType, const std::string& summaryFile);
     void RunBatchDrunk(int poolSize, int arraySize, int drunkness, const std::string& summaryFile);
 private:
     int* generateArray(int size, int distrType);

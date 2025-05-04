@@ -76,12 +76,12 @@ void AutoTest::saveResults(const std::string& summaryFile, const std::string& de
 
 
 
-void AutoTest::RunBatch(int algorithm, int poolSize, int arraySize, const std::string& summaryFile) {
+void AutoTest::RunBatch(int algorithm, int poolSize, int arraySize, int distrType, const std::string& summaryFile) {
     double* times = new double[poolSize];
     double totalTime = 0.0;
 
     for (int i = 0; i < poolSize; ++i) {
-        int* data = generateArray(arraySize);
+        int* data = generateArray(arraySize, distrType);
         double elapsed = runSingleTest(algorithm, data, arraySize);
         times[i] = elapsed;
         totalTime += elapsed;
@@ -121,7 +121,7 @@ void AutoTest::RunBatchDrunk(int poolSize, int arraySize, int drunkness, const s
     double totalTime = 0.0;
     int algorithm = 5;
     for (int i = 0; i < poolSize; ++i) {
-        int* data = generateArray(arraySize);
+        int* data = generateArray(arraySize, 0);
         double elapsed = runSingleTest(algorithm, data, arraySize);
         times[i] = elapsed;
         totalTime += elapsed;
