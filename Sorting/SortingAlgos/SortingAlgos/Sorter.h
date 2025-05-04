@@ -8,6 +8,7 @@ public:
     void heapSort(); // Now implemented from scratch
     void quickSort();
     void printArray();
+    void drunkInsertion();
 
 private:
      int* arr;

@@ -20,6 +20,9 @@ void Sorter::runSort( int algorithm) {
     case 4:
         heapSort();
         break;
+    case 5:
+        drunkInsertion();
+        break;
     default:
         std::cerr << "Algorithm not implemented.\n";
         exit(1);
@@ -69,6 +72,10 @@ void Sorter::binaryInsertionSort() {
 
         arr[left] = key;
     }
+}
+
+void Sorter::drunkInsertion() {
+    //TODO
 }
 
 void Sorter::heapSort() {

@@ -119,6 +119,16 @@ int main(int argc, char* argv[]) {
         AutoTest test;
         test.RunBatch(algorithm, poolSize, arraySize, outFile);
     }
+    else if (mode == "--drunk" && argc == 7) {
+        int algorithm = std::stoi(argv[2]);
+        int poolSize = std::stoi(argv[3]);
+        int arraySize = std::stoi(argv[4]);
+        int drunkness = std::stoi(argv[5]);
+        std::string outFile = argv[6];
+
+        AutoTest test;
+        test.RunBatch(algorithm, poolSize, arraySize, outFile);
+    }
     else {
         showHelp();
         return 1;
