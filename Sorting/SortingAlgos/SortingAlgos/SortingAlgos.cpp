@@ -21,8 +21,14 @@ void showHelp() {
         << "<size> Number of elements to generate.\n"
         << "<outputFile> File where the benchmark results will be saved.\n\n"
         << "BATCH BENCHMARK:\n"
-        << "./SortingAlgos --batchtest <algorithm> <type> <poolSize> <size> <di <outputFile>\n"
+        << "./SortingAlgos --batchtest <algorithm> <type> <poolSize> <size> <ditributionType> <outputFile>\n"
+        << "<distributionType> ( 1 - sorted ascending, 2 - sorted descending, 3 - sorted 33% of the way, 4 - sorted 66% of the way, anything else - random distribution\n"
         << "Runs tests for multiple sizes.\n\n"
+        << "DRUNK MODE:\n"
+        << "You are playing bridge with your friends, but you are drunk out of your ass.\n"
+        << "Every time you pick up a card there is d% chance (where d is drunkness % 101)\n"
+        << "you will insert that card 1 postition earlier or later in the deck\n"
+        << "./SortingAlgos --drunk <drunkness> <poolSize> <size> <ditributionType> <outputFile>\n\n"
         << "HELP MODE:\n"
         << "Usage:\n"
         << "./SortingAlgos --help\n"
@@ -101,15 +107,16 @@ int main(int argc, char* argv[]) {
         out << std::endl;
 
         delete[] data;
-        std::cout << "Benchmark complete. Results saved to " << outputFile << "\n";
+        std::cout << "test complete. Results saved to " << outputFile << "\n";
 
     }
-    else if (mode == "--batchtest" && argc == 7) {
+    else if (mode == "--batchtest" && argc == 8) {
         int algorithm = std::stoi(argv[2]);
         int type = std::stoi(argv[3]);
         int poolSize = std::stoi(argv[4]);
         int arraySize = std::stoi(argv[5]);
-        std::string outFile = argv[6];
+        int distrType = std::stoi(argv[6]);
+        std::string outFile = argv[7];
 
         if (type != 0) {
             std::cerr << "Only int type (0) is supported in batch test mode.\n";
@@ -117,17 +124,17 @@ int main(int argc, char* argv[]) {
         }
 
         AutoTest test;
-        test.RunBatch(algorithm, poolSize, arraySize, outFile);
+        test.RunBatch(algorithm, poolSize, arraySize,distrType, outFile);
     }
     else if (mode == "--drunk" && argc == 7) {
-        int algorithm = std::stoi(argv[2]);
+        int drunkness = std::stoi(argv[2]);
         int poolSize = std::stoi(argv[3]);
         int arraySize = std::stoi(argv[4]);
-        int drunkness = std::stoi(argv[5]);
+        int distrType = std::stoi(argv[5]);
         std::string outFile = argv[6];
 
         AutoTest test;
-        test.RunBatch(algorithm, poolSize, arraySize, outFile);
+        test.RunBatchDrunk(poolSize, arraySize, drunkness, distrType,  outFile);
     }
     else {
         showHelp();

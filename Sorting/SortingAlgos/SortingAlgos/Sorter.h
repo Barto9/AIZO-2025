@@ -8,13 +8,15 @@ public:
     void heapSort(); // Now implemented from scratch
     void quickSort();
     void printArray();
-    void drunkInsertion();
+    void drunkInsertion(int drunkness);
 
 private:
+
      int* arr;
      int size;
     // Helpers
     void quickSortHelper(int low, int high);
+    bool isSorted(const int* arr, int size);
     int partition(int low, int high);
 
     // Heap helpers

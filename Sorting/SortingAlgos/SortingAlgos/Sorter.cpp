@@ -20,9 +20,6 @@ void Sorter::runSort( int algorithm) {
     case 4:
         heapSort();
         break;
-    case 5:
-        drunkInsertion();
-        break;
     default:
         std::cerr << "Algorithm not implemented.\n";
         exit(1);
@@ -74,8 +71,47 @@ void Sorter::binaryInsertionSort() {
     }
 }
 
-void Sorter::drunkInsertion() {
-    //TODO
+bool Sorter::isSorted(const int* arr, int size) 
+{
+    for (int i = 1; i < size; ++i) {
+        if (arr[i - 1] > arr[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void Sorter::drunkInsertion(int drunkness) {
+    while (!isSorted(arr, size))
+    {
+
+        int error = 0;
+        for (int i = 1; i < size; ++i) {
+            int key = arr[i];
+            int j = i - 1;
+            while (j >= 0 && arr[j] > key) {
+                arr[j + 1] = arr[j];
+                --j;
+            }
+            if (drunkness % 101 >= rand() % 101)
+            {
+                if (rand() % 2 && j+1 < size - 1)
+                {
+                    error = 1;
+                }
+                else if(j - 1 > 0)
+                {
+                    error = -1;
+                }
+                else 
+                {
+                    error = 0;
+                }
+            }
+            arr[j + 1 + error] = key;
+            error = 0;
+        }
+    }
 }
 
 void Sorter::heapSort() {

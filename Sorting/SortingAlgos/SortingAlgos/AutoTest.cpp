@@ -18,7 +18,22 @@ int* AutoTest::generateArray(int size, int distrType) {
     for (int i = 0; i < size; ++i)
         arr[i] = rand();
     //IMPORTANT I USE std : sort her to minimize running time(it's most likely better that any of my algorythms)
-
+    switch (distrType) {
+    case 1://ascending
+        std::sort(arr, arr + size);
+        break;
+    case 2:  //descending
+        std::sort(arr, arr + size, std::greater<int>());
+        break;
+    case 3://33%
+        std::sort(arr, arr + size / 3);
+        break;
+    case 4:  //66%
+        std::sort(arr, arr + (2 * size / 3));
+        break;
+    default:
+        break;
+    }
     return arr;
 }
 
@@ -31,6 +46,21 @@ double AutoTest::runSingleTest(int algorithm, int* data, int size) {
     Timer timer;
     timer.start();
     sorter.runSort(algorithm);
+    timer.stop();
+    double elapsed = timer.result();
+    delete[] arrCopy;
+    return elapsed;
+}
+
+double AutoTest::runSingleTestDrunk(int drunkness, int* data, int size) {
+    int* arrCopy = new int[size];
+    for (int i = 0; i < size; ++i)
+        arrCopy[i] = data[i];
+
+    Sorter sorter(arrCopy, size);
+    Timer timer;
+    timer.start();
+    sorter.drunkInsertion(drunkness);
     timer.stop();
     double elapsed = timer.result();
     delete[] arrCopy;
@@ -116,13 +146,13 @@ void AutoTest::RunBatch(int algorithm, int poolSize, int arraySize, int distrTyp
     delete[] times;
 }
 
-void AutoTest::RunBatchDrunk(int poolSize, int arraySize, int drunkness, const std::string& summaryFile) {
+void AutoTest::RunBatchDrunk(int poolSize, int arraySize, int drunkness, int distrType, const std::string& summaryFile) {
     double* times = new double[poolSize];
     double totalTime = 0.0;
     int algorithm = 5;
     for (int i = 0; i < poolSize; ++i) {
-        int* data = generateArray(arraySize, 0);
-        double elapsed = runSingleTest(algorithm, data, arraySize);
+        int* data = generateArray(arraySize, distrType);
+        double elapsed = runSingleTestDrunk(drunkness, data, arraySize);
         times[i] = elapsed;
         totalTime += elapsed;
         delete[] data;
