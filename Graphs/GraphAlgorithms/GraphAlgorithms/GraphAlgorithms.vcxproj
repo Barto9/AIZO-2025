@@ -127,13 +127,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AdjacencyList.cpp" />
+    <ClCompile Include="DisjointSets.cpp" />
+    <ClCompile Include="EdgeHeap.cpp" />
     <ClCompile Include="Fileloader.cpp" />
+    <ClCompile Include="Graph.cpp" />
     <ClCompile Include="GraphAlgorithms.cpp" />
+    <ClCompile Include="IncidencyMatrix.cpp" />
+    <ClCompile Include="List.cpp" />
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="VerticeHeap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AdjacencyList.h" />
+    <ClInclude Include="DisjointSets.h" />
+    <ClInclude Include="Edge.h" />
+    <ClInclude Include="EdgeHeap.h" />
     <ClInclude Include="Fileloader.h" />
+    <ClInclude Include="Graph.h" />
+    <ClInclude Include="IncidencyMatrix.h" />
+    <ClInclude Include="List.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="Vertice.h" />
+    <ClInclude Include="VerticeHeap.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
