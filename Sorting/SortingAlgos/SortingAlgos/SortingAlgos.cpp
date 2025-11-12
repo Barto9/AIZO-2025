@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <thread>
+#include <fstream>
 #include "Timer.h"
 #include "Fileloader.h"
 #include "Sorter.h"
@@ -9,8 +10,8 @@ void showHelp() {
     std::cout << "FILE TEST MODE:\n"
         << "Usage:\n"
         << "./SortingAlgos --file <algorithm> <type> <inputFile> <outputFile>\n"
-        << "<algorithm> Sorting algorithm to use (e.g., 1 - InsertionBinary, 2 - Insertion, 3 - Heapsort, 4 - Quicksort).\n"
-        << "<type> Data type to load (0 - int only for now).\n"
+        << "<algorithm> Sorting algorithm to use (1 - InsertionBinary, 2 - Insertion, 3 - Heapsort, 4 - Quicksort).\n"
+        << "<type> Data type to load (0 - int, 1 - float [only quicksort], 2 - long long [only quicksort]).\n"
         << "<inputFile> Input file containing the data to be sorted.\n"
         << "[outputFile] If provided, the sorted values will be saved to this file.\n\n"
         << "BENCHMARK MODE:\n"
@@ -46,30 +47,129 @@ int main(int argc, char* argv[]) {
 
     if (mode == "--file" && argc >= 5) {
         int algorithm = std::stoi(argv[2]);
-        int type = std::stoi(argv[3]); // Currently only 0 (int) supported
+        int type = std::stoi(argv[3]); // 0=int, 1=float (quickSort only), 2=long long (quickSort only)
         std::string inputFile = argv[4];
         std::string outputFile = (argc >= 6) ? argv[5] : "";
 
-        if (type != 0) {
-            std::cerr << "Only int (type 0) is supported for now.\n";
+        if (type == 0) {
+            Fileloader loader;
+            if (loader.LoadFile(inputFile) != 0) return 1;
+
+            Timer timer;
+            Sorter sorter(loader.array, loader.size);
+            timer.start();
+            sorter.runSort( algorithm);
+            timer.stop();
+
+            std::cout << "Sorted array:\n";
+            sorter.printArray();
+            std::cout << "Time elapsed: " << timer.result() << " ms\n";
+
+            if (!outputFile.empty()) {
+                loader.SaveToFile(outputFile);
+            }
+        } else if (type == 1) {
+            // float handling (quicksort only)
+            if (algorithm != 4) {
+                std::cerr << "For float (type 1), only Quicksort (algorithm 4) is supported.\n";
+                return 1;
+            }
+            std::ifstream in(inputFile);
+            if (!in.is_open()) {
+                std::cerr << "File failed to open: " << inputFile << "\n";
+                return 1;
+            }
+            int size = 0;
+            if (!(in >> size) || size <= 0) {
+                std::cerr << "Invalid or missing size in input file.\n";
+                return 1;
+            }
+            float* data = new float[size];
+            for (int i = 0; i < size; ++i) {
+                if (!(in >> data[i])) {
+                    std::cerr << "Error reading value at index " << i << "\n";
+                    delete[] data;
+                    in.close();
+                    return 1;
+                }
+            }
+            in.close();
+
+            SorterFloat sorter(data, size);
+            Timer timer;
+            timer.start();
+            sorter.quickSort();
+            timer.stop();
+
+            std::cout << "Sorted array:\n";
+            for (int i = 0; i < size; ++i) {
+                std::cout << data[i] << " ";
+            }
+            std::cout << std::endl;
+            std::cout << "Time elapsed: " << timer.result() << " ms\n";
+
+            if (!outputFile.empty()) {
+                std::ofstream out(outputFile);
+                out << size << std::endl;
+                for (int i = 0; i < size; ++i) {
+                    out << data[i] << std::endl;
+                }
+                out.close();
+                std::cout << "Array saved to: " << outputFile << std::endl;
+            }
+            delete[] data;
+
+        } else if (type == 2) {
+            // long long handling (quicksort only)
+            if (algorithm != 4) {
+                std::cerr << "For long long (type 2), only Quicksort (algorithm 4) is supported.\n";
+                return 1;
+            }
+            std::ifstream in(inputFile);
+            int size = 0;
+            in >> size;
+            long long* data = new long long[size];
+            for (int i = 0; i < size; ++i) {
+                if (!(in >> data[i])) {
+                    std::cerr << "Error reading value at index " << i << "\n";
+                    delete[] data;
+                    in.close();
+                    return 1;
+                }
+            }
+            in.close();
+
+            SorterLong sorter(data, size);
+            Timer timer;
+            timer.start();
+            sorter.quickSort();
+            timer.stop();
+
+            std::cout << "Sorted array:\n";
+            for (int i = 0; i < size; ++i) {
+                std::cout << data[i] << " ";
+            }
+            std::cout << std::endl;
+            std::cout << "Time elapsed: " << timer.result() << " ms\n";
+
+            if (!outputFile.empty()) {
+                std::ofstream out(outputFile);
+                if (!out.is_open()) {
+                    std::cerr << "Failed to open file for writing: " << outputFile << "\n";
+                    delete[] data;
+                    return 1;
+                }
+                out << size << std::endl;
+                for (int i = 0; i < size; ++i) {
+                    out << data[i] << std::endl;
+                }
+                out.close();
+                std::cout << "Array saved to: " << outputFile << std::endl;
+            }
+            delete[] data;
+        } else {
+            std::cerr << "Unsupported type. Use 0=int, 1=float, 2=long long.\n";
             return 1;
-        }
-
-        Fileloader loader;
-        if (loader.LoadFile(inputFile) != 0) return 1;
-
-        Timer timer;
-        Sorter sorter(loader.array, loader.size);
-        timer.start();
-        sorter.runSort( algorithm);
-        timer.stop();
-
-        std::cout << "Sorted array:\n";
-        sorter.printArray();
-        std::cout << "Time elapsed: " << timer.result() << " ms\n";
-
-        if (!outputFile.empty()) {
-            loader.SaveToFile(outputFile);
         }
 
     }
@@ -135,9 +235,11 @@ int main(int argc, char* argv[]) {
         case 1:
             
             testF.RunBatchFloat(poolSize, arraySize, outFile);
+            break;
         case 2:
             
             testL.RunBatchLong(poolSize, arraySize, outFile);
+            break;
         default:
             break;
         }

@@ -45,12 +45,11 @@ int Fileloader::SaveToFile(const std::string& filename) const
 	// Write the size first
 	outfile << size << std::endl;
 
-	// Write array values
+	// Write array values, one per line
 	for (int i = 0; i < size; i++)
 	{
-		outfile << array[i] << " ";
+		outfile << array[i] << std::endl;
 	}
-	outfile << std::endl;
 
 	std::cout << "Array saved to: " << filename << std::endl;
 	return 0;
