@@ -10,8 +10,10 @@ private:
     int* generateArray(int size, int distrType);
     double runSingleTest(int algorithm, int* data, int size);
     double runSingleTestDrunk(int drunkness, int* data, int size);
+    bool isSorted(int* arr, int size);
     void saveResults(const std::string& summaryFile, const std::string& detailFile,
         int size, double avgTimeMs, double medianMs, double stdDevMs,
+        double minTimeMs, double maxTimeMs,
         int algorithm, int poolSize, double* times);
 };
 
@@ -22,8 +24,10 @@ public:
 private:
     float* generateArrayFloat(int size);
     double runSingleTestFloat(float* data, int size);
+    bool isSortedFloat(float* arr, int size);
     void saveResultsFloat(const std::string& summaryFile, const std::string& detailFile,
         int size, double avgTimeMs, double medianMs, double stdDevMs,
+        double minTimeMs, double maxTimeMs,
         int poolSize, double* times);
 };
 class AutoTestLong {
@@ -33,7 +37,9 @@ public:
 private:
     long long int* generateArrayLong(int size);
     double runSingleTestLong(long long int* data, int size);
+    bool isSortedLong(long long int* arr, int size);
     void saveResultsLong(const std::string& summaryFile, const std::string& detailFile,
         int size, double avgTimeMs, double medianMs, double stdDevMs,
+        double minTimeMs, double maxTimeMs,
         int poolSize, double* times);
 };

@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
 
         } else if (type == 2) {
             // long long handling (quicksort only)
-            if (algorithm != 4) {
+            if (algorithm != 3) {
                 std::cerr << "For long long (type 2), only Quicksort (algorithm 4) is supported.\n";
                 return 1;
             }
@@ -219,7 +219,7 @@ int main(int argc, char* argv[]) {
         int distrType = std::stoi(argv[6]);
         std::string outFile = argv[7];
 
-        if (type != 0 && algorithm != 4) {
+        if (type != 0 && algorithm != 3) {
             std::cerr << "Only Quicksort has other data types implemented\n";
             return 1;
         }

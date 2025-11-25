@@ -142,14 +142,31 @@ void Sorter::quickSort() {
 }
 
 void Sorter::quickSortHelper(int low, int high) {
-    if (low < high) {
+    while (low < high) {
         int pi = partition(low, high);
-        quickSortHelper(low, pi - 1);
-        quickSortHelper(pi + 1, high);
+        
+        // Tail recursion optimization: recurse on smaller partition first
+        if (pi - low < high - pi) {
+            quickSortHelper(low, pi - 1);
+            low = pi + 1;
+        } else {
+            quickSortHelper(pi + 1, high);
+            high = pi - 1;
+        }
     }
 }
 
 int Sorter::partition(int low, int high) {
+    // Use median-of-three pivot to avoid worst case on sorted arrays
+    if (high - low > 1) {
+        int mid = low + (high - low) / 2;
+        // Find median of low, mid, high and move it to position high
+        if (arr[mid] < arr[low]) swap(arr[low], arr[mid]);
+        if (arr[high] < arr[low]) swap(arr[low], arr[high]);
+        if (arr[high] < arr[mid]) swap(arr[mid], arr[high]);
+        // Now median is at arr[high], use it as pivot
+    }
+    
     int pivot = arr[high];
     int i = low - 1;
 

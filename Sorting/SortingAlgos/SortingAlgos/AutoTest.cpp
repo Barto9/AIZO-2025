@@ -19,6 +19,36 @@ AutoTestLong::AutoTestLong() {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 }
 
+bool AutoTest::isSorted(int* arr, int size) {
+    if (size <= 1) return true;
+    for (int i = 0; i < size - 1; ++i) {
+        if (arr[i] > arr[i + 1]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool AutoTestFloat::isSortedFloat(float* arr, int size) {
+    if (size <= 1) return true;
+    for (int i = 0; i < size - 1; ++i) {
+        if (arr[i] > arr[i + 1]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool AutoTestLong::isSortedLong(long long int* arr, int size) {
+    if (size <= 1) return true;
+    for (int i = 0; i < size - 1; ++i) {
+        if (arr[i] > arr[i + 1]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 int* AutoTest::generateArray(int size, int distrType) {
     int* arr = new int[size];
     for (int i = 0; i < size; ++i)
@@ -54,6 +84,12 @@ double AutoTest::runSingleTest(int algorithm, int* data, int size) {
     sorter.runSort(algorithm);
     timer.stop();
     double elapsed = timer.result();
+    
+    // Check if array is correctly sorted
+    if (!isSorted(arrCopy, size)) {
+        std::cerr << "ERROR: Array was not sorted correctly by algorithm " << algorithm << "!\n";
+    }
+    
     delete[] arrCopy;
     return elapsed;
 }
@@ -69,12 +105,19 @@ double AutoTest::runSingleTestDrunk(int drunkness, int* data, int size) {
     sorter.drunkInsertion(drunkness);
     timer.stop();
     double elapsed = timer.result();
+    
+    // Check if array is correctly sorted
+    if (!isSorted(arrCopy, size)) {
+        std::cerr << "ERROR: Array was not sorted correctly by drunk insertion (drunkness: " << drunkness << ")!\n";
+    }
+    
     delete[] arrCopy;
     return elapsed;
 }
 
 void AutoTest::saveResults(const std::string& summaryFile, const std::string& detailFile,
-    int size, double avgTimeMs, double medianMs, double stdDevMs, int algorithm, int poolSize, double* times) {
+    int size, double avgTimeMs, double medianMs, double stdDevMs, double minTimeMs, double maxTimeMs,
+    int algorithm, int poolSize, double* times) {
 
     // Save summary
     std::ofstream out(summaryFile, std::ios::app);
@@ -86,12 +129,12 @@ void AutoTest::saveResults(const std::string& summaryFile, const std::string& de
     // If it's the first write, add header
     static bool headerWritten = false;
     if (!headerWritten) {
-        out << "Algorithm;Size;PoolSize;AvgTimeMs;MedianMs;StdDevMs\n";
+        out << "Algorithm;Size;PoolSize;AvgTimeMs;MedianMs;StdDevMs;MinTimeMs;MaxTimeMs\n";
         headerWritten = true;
     }
 
     out << algorithm << ";" << size << ";" << poolSize << ";"
-        << avgTimeMs << ";" << medianMs << ";" << stdDevMs << "\n";
+        << avgTimeMs << ";" << medianMs << ";" << stdDevMs << ";" << minTimeMs << ";" << maxTimeMs << "\n";
     out.close();
 
     // Save detailed run times
@@ -139,6 +182,10 @@ void AutoTest::RunBatch(int algorithm, int poolSize, int arraySize, int distrTyp
         variance += (times[i] - avgTime) * (times[i] - avgTime);
     double stdDev = std::sqrt(variance / poolSize);
 
+    // Compute min and max (times array is already sorted)
+    double minTime = times[0];
+    double maxTime = times[poolSize - 1];
+
     // Construct detail filename with parameters
     std::string detailFile = "detailed_alg" + std::to_string(algorithm)
         + "_pool" + std::to_string(poolSize)
@@ -146,9 +193,10 @@ void AutoTest::RunBatch(int algorithm, int poolSize, int arraySize, int distrTyp
 
     std::cout << "Algorithm " << algorithm << " | Size " << arraySize
         << " | Pool " << poolSize << " | Avg: " << avgTime
-        << " ms | Median: " << median << " ms | StdDev: " << stdDev << "\n";
+        << " ms | Median: " << median << " ms | StdDev: " << stdDev
+        << " ms | Min: " << minTime << " ms | Max: " << maxTime << " ms\n";
 
-    saveResults(summaryFile, detailFile, arraySize, avgTime, median, stdDev, algorithm, poolSize, times);
+    saveResults(summaryFile, detailFile, arraySize, avgTime, median, stdDev, minTime, maxTime, algorithm, poolSize, times);
     delete[] times;
 }
 
@@ -179,6 +227,10 @@ void AutoTest::RunBatchDrunk(int poolSize, int arraySize, int drunkness, int dis
         variance += (times[i] - avgTime) * (times[i] - avgTime);
     double stdDev = std::sqrt(variance / poolSize);
 
+    // Compute min and max (times array is already sorted)
+    double minTime = times[0];
+    double maxTime = times[poolSize - 1];
+
     // Construct detail filename with parameters
     std::string detailFile = "detailed_alg" + std::to_string(algorithm)
         + "_pool" + std::to_string(poolSize)
@@ -186,9 +238,10 @@ void AutoTest::RunBatchDrunk(int poolSize, int arraySize, int drunkness, int dis
 
     std::cout << "Algorithm " << algorithm << " | Size " << arraySize
         << " | Pool " << poolSize << " | Avg: " << avgTime
-        << " ms | Median: " << median << " ms | StdDev: " << stdDev << "\n";
+        << " ms | Median: " << median << " ms | StdDev: " << stdDev
+        << " ms | Min: " << minTime << " ms | Max: " << maxTime << " ms\n";
 
-    saveResults(summaryFile, detailFile, arraySize, avgTime, median, stdDev, algorithm, poolSize, times);
+    saveResults(summaryFile, detailFile, arraySize, avgTime, median, stdDev, minTime, maxTime, algorithm, poolSize, times);
     delete[] times;
 }
 //float stuff
@@ -211,6 +264,12 @@ double AutoTestFloat::runSingleTestFloat(float* data, int size) {
     sorter.quickSort();
     timer.stop();
     double elapsed = timer.result();
+    
+    // Check if array is correctly sorted
+    if (!isSortedFloat(arrCopy, size)) {
+        std::cerr << "ERROR: Float array was not sorted correctly!\n";
+    }
+    
     delete[] arrCopy;
     return elapsed;
 }
@@ -230,6 +289,7 @@ void AutoTestFloat::RunBatchFloat(int poolSize, int arraySize, const std::string
     // Compute average
     double avgTime = totalTime / poolSize;
 
+
     // Compute median IMPORTANT I USE std:sort her to minimize running time (it's most likely better that any of my algorythms)
     std::sort(times, times + poolSize);
     double median = (poolSize % 2 == 0)
@@ -242,6 +302,10 @@ void AutoTestFloat::RunBatchFloat(int poolSize, int arraySize, const std::string
         variance += (times[i] - avgTime) * (times[i] - avgTime);
     double stdDev = std::sqrt(variance / poolSize);
 
+    // Compute min and max (times array is already sorted)
+    double minTime = times[0];
+    double maxTime = times[poolSize - 1];
+
     // Construct detail filename with parameters
     std::string detailFile = "detailed_algFLOAT" + std::to_string(algorithm)
         + "_pool" + std::to_string(poolSize)
@@ -249,13 +313,15 @@ void AutoTestFloat::RunBatchFloat(int poolSize, int arraySize, const std::string
 
     std::cout << "Algorithm " << algorithm << " | Size " << arraySize
         << " | Pool " << poolSize << " | Avg: " << avgTime
-        << " ms | Median: " << median << " ms | StdDev: " << stdDev << "\n";
+        << " ms | Median: " << median << " ms | StdDev: " << stdDev
+        << " ms | Min: " << minTime << " ms | Max: " << maxTime << " ms\n";
 
-    saveResultsFloat(summaryFile, detailFile, arraySize, avgTime, median, stdDev, poolSize, times);
+    saveResultsFloat(summaryFile, detailFile, arraySize, avgTime, median, stdDev, minTime, maxTime, poolSize, times);
     delete[] times;
 }
 void AutoTestFloat::saveResultsFloat(const std::string& summaryFile, const std::string& detailFile,
-    int size, double avgTimeMs, double medianMs, double stdDevMs, int poolSize, double* times) {
+    int size, double avgTimeMs, double medianMs, double stdDevMs, double minTimeMs, double maxTimeMs,
+    int poolSize, double* times) {
     int algorithm = 3;
     // Save summary
     std::ofstream out(summaryFile, std::ios::app);
@@ -267,12 +333,12 @@ void AutoTestFloat::saveResultsFloat(const std::string& summaryFile, const std::
     // If it's the first write, add header
     static bool headerWritten = false;
     if (!headerWritten) {
-        out << "Algorithm;Size;PoolSize;AvgTimeMs;MedianMs;StdDevMs\n";
+        out << "Algorithm;Size;PoolSize;AvgTimeMs;MedianMs;StdDevMs;MinTimeMs;MaxTimeMs\n";
         headerWritten = true;
     }
 
     out << algorithm <<"FLOAT" << ";" << size << ";" << poolSize << ";"
-        << avgTimeMs << ";" << medianMs << ";" << stdDevMs << "\n";
+        << avgTimeMs << ";" << medianMs << ";" << stdDevMs << ";" << minTimeMs << ";" << maxTimeMs << "\n";
     out.close();
 
     // Save detailed run times
@@ -308,6 +374,12 @@ double AutoTestLong::runSingleTestLong(long long int* data, int size) {
     sorter.quickSort();
     timer.stop();
     double elapsed = timer.result();
+    
+    // Check if array is correctly sorted
+    if (!isSortedLong(arrCopy, size)) {
+        std::cerr << "ERROR: Long long array was not sorted correctly!\n";
+    }
+    
     delete[] arrCopy;
     return elapsed;
 }
@@ -339,6 +411,10 @@ void AutoTestLong::RunBatchLong(int poolSize, int arraySize, const std::string& 
         variance += (times[i] - avgTime) * (times[i] - avgTime);
     double stdDev = std::sqrt(variance / poolSize);
 
+    // Compute min and max (times array is already sorted)
+    double minTime = times[0];
+    double maxTime = times[poolSize - 1];
+
     // Construct detail filename with parameters
     std::string detailFile = "detailed_algLONG" + std::to_string(algorithm)
         + "_pool" + std::to_string(poolSize)
@@ -346,13 +422,15 @@ void AutoTestLong::RunBatchLong(int poolSize, int arraySize, const std::string& 
 
     std::cout << "Algorithm " << algorithm << " | Size " << arraySize
         << " | Pool " << poolSize << " | Avg: " << avgTime
-        << " ms | Median: " << median << " ms | StdDev: " << stdDev << "\n";
+        << " ms | Median: " << median << " ms | StdDev: " << stdDev
+        << " ms | Min: " << minTime << " ms | Max: " << maxTime << " ms\n";
 
-    saveResultsLong(summaryFile, detailFile, arraySize, avgTime, median, stdDev,poolSize, times);
+    saveResultsLong(summaryFile, detailFile, arraySize, avgTime, median, stdDev, minTime, maxTime, poolSize, times);
     delete[] times;
 }
 void AutoTestLong::saveResultsLong(const std::string& summaryFile, const std::string& detailFile,
-    int size, double avgTimeMs, double medianMs, double stdDevMs, int poolSize, double* times) {
+    int size, double avgTimeMs, double medianMs, double stdDevMs, double minTimeMs, double maxTimeMs,
+    int poolSize, double* times) {
     int algorithm = 3;
     // Save summary
     std::ofstream out(summaryFile, std::ios::app);
@@ -364,12 +442,12 @@ void AutoTestLong::saveResultsLong(const std::string& summaryFile, const std::st
     // If it's the first write, add header
     static bool headerWritten = false;
     if (!headerWritten) {
-        out << "Algorithm;Size;PoolSize;AvgTimeMs;MedianMs;StdDevMs\n";
+        out << "Algorithm;Size;PoolSize;AvgTimeMs;MedianMs;StdDevMs;MinTimeMs;MaxTimeMs\n";
         headerWritten = true;
     }
 
     out << algorithm << "LONG" << ";" << size << ";" << poolSize << ";"
-        << avgTimeMs << ";" << medianMs << ";" << stdDevMs << "\n";
+        << avgTimeMs << ";" << medianMs << ";" << stdDevMs << ";" << minTimeMs << ";" << maxTimeMs << "\n";
     out.close();
 
     // Save detailed run times
