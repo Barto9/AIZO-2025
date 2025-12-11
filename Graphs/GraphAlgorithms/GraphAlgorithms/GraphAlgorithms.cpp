@@ -1,37 +1,40 @@
 ﻿#include <iostream>
-#include <thread>
+#include <string>
+#include <fstream>
 #include "Timer.h"
-#include "Fileloader.h"
+#include "Graph.h"
 
 void showHelp() {
     std::cout << "FILE TEST MODE:\n"
-        << "Usage:\n"
-        << "./SortingAlgos --file <algorithm> <type> <inputFile> <outputFile>\n"
-        << "<algorithm> Sorting algorithm to use (e.g., 1 - InsertionBinary, 2 - Insertion, 3 - Heapsort, 4 - Quicksort).\n"
-        << "<type> Data type to load (0 - int only for now).\n"
-        << "<inputFile> Input file containing the data to be sorted.\n"
-        << "[outputFile] If provided, the sorted values will be saved to this file.\n\n"
+        << "    Usage:\n"
+        << "        ./YourProject --file <problem> <algorithm> <inputFile> [outputFile]\n"
+        << "    <problem> Problem to solve (e.g. 0 - MST, 1 - shortest path)\n"
+        << "    <algorithm> Algorithm for the problem\n"
+        << "        For MST (e.g. 0 - all, 1 - Prim's, ...)\n"
+        << "        For shortest (e.g. 0 - all, 1 - Dijkstra, ...)\n"
+        << "    <inputFile> Input file containing the graf.\n"
+        << "    [outputFile] If provided, solved problem will be stored there.\n\n"
         << "BENCHMARK MODE:\n"
-        << "Usage:\n"
-        << "./SortingAlgos --test <algorithm> <type> <arraysize> <distibutionType> <outputFile>\n"
-        << "<algorithm> Sorting algorithm to use.\n"
-        << "<type> Data type to generate (0 - int only for now).\n"
-        << "<size> Number of elements to generate.\n"
-        << "<outputFile> File where the benchmark results will be saved.\n\n"
-        << "BATCH BENCHMARK:\n"
-        << "./SortingAlgos --batchtest <algorithm> <type> <poolSize> <size> <ditributionType> <outputFile>\n"
-        << "<distributionType> ( 1 - sorted ascending, 2 - sorted descending, 3 - sorted 33% of the way, 4 - sorted 66% of the way, anything else - random distribution\n"
-        << "Runs tests for multiple sizes. IMPORTANT, THIS IS THE ONLY MODE THAT ACCEPTS NOT ONLY INT!!!\n"
-        << "Quicksort (4) algorythm also accepts float (1) and long long int (2) types.\n\n"
-        << "DRUNK MODE:\n"
-        << "You are playing bridge with your friends, but you are drunk out of your ass.\n"
-        << "Every time you pick up a card there is d% chance (where d is drunkness % 101)\n"
-        << "you will insert that card 1 postition earlier or later in the deck\n"
-        << "./SortingAlgos --drunk <drunkness> <poolSize> <size> <ditributionType> <outputFile>\n\n"
+        << "    Usage:\n"
+        << "        ./YourProject --test <problem> <algorithm> <size> <density> <count>\n"
+        << "                <outputFile>\n"
+        << "    <problem> Problem to solve (e.g. 0 - MST, 1 - shortest path)\n"
+        << "    <algorithm> Algorithm for the problem\n"
+        << "        For MST (e.g. 0 - all, 1 - Prim's, ...)\n"
+        << "        For shortest (e.g. 0 - all, 1 - Dijkstra, ...)\n"
+        << "    <size> Number of nodes.\n"
+        << "    <density> Density of edges.\n"
+        << "    <count> How many times test should be repeated (with graph regen).\n"
+        << "    <outputFile> File where the benchmark results should be saved\n"
+        << "        (every measured time is stored in seperate line).\n\n"
         << "HELP MODE:\n"
-        << "Usage:\n"
-        << "./SortingAlgos --help\n"
-        << "Displays this help message.\n";
+        << "    Usage:\n"
+        << "        ./YourProject --help\n"
+        << "    Displays this help message.\n"
+        << "    Notes:\n"
+        << "    - The help message will also appear if no arguments are provided.\n"
+        << "    - Ensure that either --file or --test mode is specified;\n"
+        << "        they are mutually exclusive.\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -42,116 +45,227 @@ int main(int argc, char* argv[]) {
 
     std::string mode = argv[1];
 
-    if (mode == "--file" && argc >= 5) {
-        int algorithm = std::stoi(argv[2]);
-        int type = std::stoi(argv[3]); // Currently only 0 (int) supported
+    // FILE TEST MODE
+    if (mode == "--file") {
+        if (argc < 5) {
+            std::cerr << "Error: Insufficient arguments for --file mode.\n";
+            showHelp();
+            return 1;
+        }
+
+        int problem = std::stoi(argv[2]);
+        int algorithm = std::stoi(argv[3]);
         std::string inputFile = argv[4];
         std::string outputFile = (argc >= 6) ? argv[5] : "";
 
-        if (type != 0) {
-            std::cerr << "Only int (type 0) is supported for now.\n";
+        // Validate problem type
+        if (problem != 0 && problem != 1) {
+            std::cerr << "Error: Invalid problem type. Use 0 for MST, 1 for shortest path.\n";
             return 1;
         }
 
-        Fileloader loader;
-        if (loader.LoadFile(inputFile) != 0) return 1;
+        // Load graph from file
+        Graph graph;
+        graph.loadFromFile(inputFile);
+        // Initialize graph representations (matrix and list)
+        // Determine if graph is directed based on problem type
+        bool directed = (problem == 1); // Shortest path uses directed graphs
+        graph.init(directed);
+
+        // Display graph
+        std::cout << "Loaded graph:\n";
+        graph.display();
 
         Timer timer;
-        Sorter sorter(loader.array, loader.size);
-        timer.start();
-        sorter.runSort(algorithm);
-        timer.stop();
-
-        std::cout << "Sorted array:\n";
-        sorter.printArray();
-        std::cout << "Time elapsed: " << timer.result() << " ms\n";
+        std::ofstream outFile;
 
         if (!outputFile.empty()) {
-            loader.SaveToFile(outputFile);
+            outFile.open(outputFile);
+            if (!outFile.is_open()) {
+                std::cerr << "Error: Failed to open output file: " << outputFile << "\n";
+                return 1;
+            }
         }
 
+        // Execute algorithm based on problem type
+        if (problem == 0) { // MST
+            if (algorithm == 0) { // All MST algorithms
+                std::cout << "\n=== Running Prim's algorithm ===\n";
+                timer.reset();
+                timer.start();
+                graph.mst_prim();
+                timer.stop();
+                std::cout << "Time elapsed: " << timer.result() << " ms\n";
+                if (outFile.is_open()) {
+                    outFile << "Prim: " << timer.result() << " ms\n";
+                }
+
+                std::cout << "\n=== Running Kruskal's algorithm ===\n";
+                timer.reset();
+                timer.start();
+                graph.mst_kruskal();
+                timer.stop();
+                std::cout << "Time elapsed: " << timer.result() << " ms\n";
+                if (outFile.is_open()) {
+                    outFile << "Kruskal: " << timer.result() << " ms\n";
+                }
+            }
+            else if (algorithm == 1) { // Prim's
+                std::cout << "\n=== Running Prim's algorithm ===\n";
+                timer.reset();
+                timer.start();
+                graph.mst_prim();
+                timer.stop();
+                std::cout << "Time elapsed: " << timer.result() << " ms\n";
+                if (outFile.is_open()) {
+                    outFile << timer.result() << "\n";
+                }
+            }
+            else if (algorithm == 2) { // Kruskal's
+                std::cout << "\n=== Running Kruskal's algorithm ===\n";
+                timer.reset();
+                timer.start();
+                graph.mst_kruskal();
+                timer.stop();
+                std::cout << "Time elapsed: " << timer.result() << " ms\n";
+                if (outFile.is_open()) {
+                    outFile << timer.result() << "\n";
+                }
+            }
+            else {
+                std::cerr << "Error: Invalid algorithm for MST. Use 0 (all), 1 (Prim's), or 2 (Kruskal's).\n";
+                return 1;
+            }
+        }
+        else if (problem == 1) { // Shortest path
+            // For shortest path, read order from file to determine end vertex
+            // Read first line to get order (number of vertices)
+            std::ifstream tempFile(inputFile);
+            int tempSize, tempOrder;
+            if (tempFile.is_open()) {
+                tempFile >> tempSize >> tempOrder;
+                tempFile.close();
+            }
+            else {
+                std::cerr << "Error: Could not read graph order from file.\n";
+                return 1;
+            }
+            
+            int startVertex = 0;
+            int endVertex = (tempOrder > 0) ? tempOrder - 1 : 0;
+
+            if (algorithm == 0) { // All shortest path algorithms
+                std::cout << "\n=== Running Dijkstra's algorithm ===\n";
+                std::cout << "From vertex " << startVertex << " to vertex " << endVertex << "\n";
+                timer.reset();
+                timer.start();
+                graph.spp_dijkstra(startVertex, endVertex);
+                timer.stop();
+                std::cout << "Time elapsed: " << timer.result() << " ms\n";
+                if (outFile.is_open()) {
+                    outFile << "Dijkstra: " << timer.result() << " ms\n";
+                }
+            }
+            else if (algorithm == 1) { // Dijkstra's
+                std::cout << "\n=== Running Dijkstra's algorithm ===\n";
+                std::cout << "From vertex " << startVertex << " to vertex " << endVertex << "\n";
+                timer.reset();
+                timer.start();
+                graph.spp_dijkstra(startVertex, endVertex);
+                timer.stop();
+                std::cout << "Time elapsed: " << timer.result() << " ms\n";
+                if (outFile.is_open()) {
+                    outFile << timer.result() << "\n";
+                }
+            }
+            else {
+                std::cerr << "Error: Invalid algorithm for shortest path. Use 0 (all) or 1 (Dijkstra).\n";
+                return 1;
+            }
+        }
+
+        if (outFile.is_open()) {
+            outFile.close();
+            std::cout << "\nResults saved to: " << outputFile << "\n";
+        }
     }
-    else if (mode == "--test" && argc == 6) {
-        int algorithm = std::stoi(argv[2]);
-        int type = std::stoi(argv[3]);
+    // BENCHMARK MODE
+    else if (mode == "--test") {
+        if (argc < 8) {
+            std::cerr << "Error: Insufficient arguments for --test mode.\n";
+            showHelp();
+            return 1;
+        }
+
+        int problem = std::stoi(argv[2]);
+        int algorithm = std::stoi(argv[3]);
         int size = std::stoi(argv[4]);
-        std::string outputFile = argv[5];
+        int density = std::stoi(argv[5]);
+        int count = std::stoi(argv[6]);
+        std::string outputFile = argv[7];
 
-        if (type != 0) {
-            std::cerr << "Only int implemented\n";
+        // Validate problem type
+        if (problem != 0 && problem != 1) {
+            std::cerr << "Error: Invalid problem type. Use 0 for MST, 1 for shortest path.\n";
             return 1;
         }
 
-        int* data = new int[size];
-        srand(static_cast<unsigned>(time(nullptr)));
-        for (int i = 0; i < size; ++i)
-            data[i] = rand();
+        // Open output file
+        std::ofstream outFile(outputFile);
+        if (!outFile.is_open()) {
+            std::cerr << "Error: Failed to open output file: " << outputFile << "\n";
+            return 1;
+        }
 
-        Sorter sorter(data, size);
+        std::cout << "Running benchmark: problem=" << problem 
+                  << ", algorithm=" << algorithm 
+                  << ", size=" << size 
+                  << ", density=" << density 
+                  << ", count=" << count << "\n";
+
         Timer timer;
-        timer.start();
-        sorter.runSort(algorithm);
-        timer.stop();
+        bool directed = (problem == 1); // Shortest path uses directed graphs
 
-        std::ofstream out(outputFile);
-        if (!out) {
-            std::cerr << "Failed to open output file.\n";
-            delete[] data;
-            return 1;
+        for (int i = 0; i < count; i++) {
+            Graph graph;
+            graph.generateRandomGraph(size, density, directed);
+
+            if (problem == 0) { // MST
+                if (algorithm == 0 || algorithm == 1) { // Prim's
+                    timer.reset();
+                    timer.start();
+                    graph.mst_prim();
+                    timer.stop();
+                    outFile << timer.result() << "\n";
+                }
+                if (algorithm == 0 || algorithm == 2) { // Kruskal's
+                    timer.reset();
+                    timer.start();
+                    graph.mst_kruskal();
+                    timer.stop();
+                    outFile << timer.result() << "\n";
+                }
+            }
+            else if (problem == 1) { // Shortest path
+                int startVertex = 0;
+                int endVertex = size - 1;
+                if (algorithm == 0 || algorithm == 1) { // Dijkstra's
+                    timer.reset();
+                    timer.start();
+                    graph.spp_dijkstra(startVertex, endVertex);
+                    timer.stop();
+                    outFile << timer.result() << "\n";
+                }
+            }
+
+            std::cout << "Completed test " << (i + 1) << "/" << count << "\n";
         }
 
-        out << "Sorted " << size << " elements in " << timer.result() << " ms\n";
-        for (int i = 0; i < size; ++i)
-            out << data[i] << " ";
-        out << std::endl;
-
-        delete[] data;
-        std::cout << "test complete. Results saved to " << outputFile << "\n";
-
-    }
-    else if (mode == "--batchtest" && argc == 8) {
-        int algorithm = std::stoi(argv[2]);
-        int type = std::stoi(argv[3]);
-        int poolSize = std::stoi(argv[4]);
-        int arraySize = std::stoi(argv[5]);
-        int distrType = std::stoi(argv[6]);
-        std::string outFile = argv[7];
-
-        if (type != 0 && algorithm != 4) {
-            std::cerr << "Only Quicksort has other data types implemented\n";
-            return 1;
-        }
-        AutoTest test;
-        AutoTestFloat testF;
-        AutoTestLong testL;
-        switch (type)
-        {
-        case 0:
-
-            test.RunBatch(algorithm, poolSize, arraySize, distrType, outFile);
-            break;
-        case 1:
-
-            testF.RunBatchFloat(poolSize, arraySize, outFile);
-        case 2:
-
-            testL.RunBatchLong(poolSize, arraySize, outFile);
-        default:
-            break;
-        }
-
-    }
-    else if (mode == "--drunk" && argc == 7) {
-        int drunkness = std::stoi(argv[2]);
-        int poolSize = std::stoi(argv[3]);
-        int arraySize = std::stoi(argv[4]);
-        int distrType = std::stoi(argv[5]);
-        std::string outFile = argv[6];
-
-        AutoTest test;
-        test.RunBatchDrunk(poolSize, arraySize, drunkness, distrType, outFile);
+        outFile.close();
+        std::cout << "Benchmark complete. Results saved to: " << outputFile << "\n";
     }
     else {
+        std::cerr << "Error: Invalid mode. Use --file, --test, or --help.\n";
         showHelp();
         return 1;
     }
@@ -159,14 +273,3 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-/*int main() {
-    Timer timer;
-    Fileloader fileloader;
-    fileloader.LoadFile("test.txt");
-    std::cout << "File loaded successfully." << std::endl;
-    fileloader.DisplayArray();
-    Sorter sorter(fileloader.array, fileloader.size);
-    sorter.quickSort();
-    sorter.printArray();
-    return 0;
-}*/
