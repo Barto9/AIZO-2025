@@ -1,13 +1,17 @@
-﻿#include <iostream>
+﻿
+#include <iostream>
 #include <string>
 #include <fstream>
+#include <vector>
+#include <cmath>
+#include <iomanip>
 #include "Timer.h"
 #include "Graph.h"
 
 void showHelp() {
     std::cout << "FILE TEST MODE:\n"
         << "    Usage:\n"
-        << "        ./YourProject --file <problem> <algorithm> <inputFile> [outputFile]\n"
+        << "        ./GraphAlgorithms --file <problem> <algorithm> <inputFile> [outputFile]\n"
         << "    <problem> Problem to solve (e.g. 0 - MST, 1 - shortest path)\n"
         << "    <algorithm> Algorithm for the problem\n"
         << "        For MST (e.g. 0 - all, 1 - Prim's, ...)\n"
@@ -16,7 +20,7 @@ void showHelp() {
         << "    [outputFile] If provided, solved problem will be stored there.\n\n"
         << "BENCHMARK MODE:\n"
         << "    Usage:\n"
-        << "        ./YourProject --test <problem> <algorithm> <size> <density> <count>\n"
+        << "        ./GraphAlgorithms --test <problem> <algorithm> <size> <density> <count>\n"
         << "                <outputFile>\n"
         << "    <problem> Problem to solve (e.g. 0 - MST, 1 - shortest path)\n"
         << "    <algorithm> Algorithm for the problem\n"
@@ -29,7 +33,7 @@ void showHelp() {
         << "        (every measured time is stored in seperate line).\n\n"
         << "HELP MODE:\n"
         << "    Usage:\n"
-        << "        ./YourProject --help\n"
+        << "        ./GraphAlgorithms --help\n"
         << "    Displays this help message.\n"
         << "    Notes:\n"
         << "    - The help message will also appear if no arguments are provided.\n"
@@ -64,16 +68,57 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
+        // Read file header to verify format
+        std::ifstream verifyFile(inputFile);
+        int declaredEdges, declaredVertices;
+        if (!verifyFile.is_open()) {
+            std::cerr << "Error: Could not open input file: " << inputFile << "\n";
+            return 1;
+        }
+        
+        // Read first line: edges and vertices (tab-separated)
+        if (!(verifyFile >> declaredEdges >> declaredVertices)) {
+            std::cerr << "Error: Invalid file format. First line must contain: edges<TAB>vertices\n";
+            verifyFile.close();
+            return 1;
+        }
+        verifyFile.close();
+
+        std::cout << "\n=== File Format Verification ===\n";
+        std::cout << "Declared in file: " << declaredEdges << " edges, " << declaredVertices << " vertices\n";
+
         // Load graph from file
         Graph graph;
         graph.loadFromFile(inputFile);
+        
+        // Verify loaded graph matches declared values
+        int loadedEdges = graph.getSize();
+        int loadedVertices = graph.getOrder();
+        
+        std::cout << "Loaded from structure: " << loadedEdges << " edges, " << loadedVertices << " vertices\n";
+        
+        if (loadedEdges != declaredEdges) {
+            std::cerr << "WARNING: Number of edges mismatch! Declared: " << declaredEdges 
+                      << ", Loaded: " << loadedEdges << "\n";
+        } else {
+            std::cout << "✓ Edge count verification: PASSED\n";
+        }
+        
+        if (loadedVertices != declaredVertices) {
+            std::cerr << "WARNING: Number of vertices mismatch! Declared: " << declaredVertices 
+                      << ", Loaded: " << loadedVertices << "\n";
+        } else {
+            std::cout << "✓ Vertex count verification: PASSED\n";
+        }
+        
         // Initialize graph representations (matrix and list)
         // Determine if graph is directed based on problem type
         bool directed = (problem == 1); // Shortest path uses directed graphs
         graph.init(directed);
 
-        // Display graph
-        std::cout << "Loaded graph:\n";
+        // Display graph in both representations
+        std::cout << "\n=== Graph Representation ===\n";
+        std::cout << "Graph type: " << (directed ? "Directed" : "Undirected") << "\n";
         graph.display();
 
         Timer timer;
@@ -89,47 +134,52 @@ int main(int argc, char* argv[]) {
 
         // Execute algorithm based on problem type
         if (problem == 0) { // MST
+            std::cout << "\n=== Minimum Spanning Tree (MST) Solution ===\n";
             if (algorithm == 0) { // All MST algorithms
-                std::cout << "\n=== Running Prim's algorithm ===\n";
+                std::cout << "\n--- Prim's Algorithm ---\n";
                 timer.reset();
                 timer.start();
                 graph.mst_prim();
                 timer.stop();
                 std::cout << "Time elapsed: " << timer.result() << " ms\n";
                 if (outFile.is_open()) {
-                    outFile << "Prim: " << timer.result() << " ms\n";
+                    outFile << "=== Prim's Algorithm ===\n";
+                    outFile << "Time: " << timer.result() << " ms\n";
                 }
 
-                std::cout << "\n=== Running Kruskal's algorithm ===\n";
+                std::cout << "\n--- Kruskal's Algorithm ---\n";
                 timer.reset();
                 timer.start();
                 graph.mst_kruskal();
                 timer.stop();
                 std::cout << "Time elapsed: " << timer.result() << " ms\n";
                 if (outFile.is_open()) {
-                    outFile << "Kruskal: " << timer.result() << " ms\n";
+                    outFile << "\n=== Kruskal's Algorithm ===\n";
+                    outFile << "Time: " << timer.result() << " ms\n";
                 }
             }
             else if (algorithm == 1) { // Prim's
-                std::cout << "\n=== Running Prim's algorithm ===\n";
+                std::cout << "\n--- Prim's Algorithm ---\n";
                 timer.reset();
                 timer.start();
                 graph.mst_prim();
                 timer.stop();
                 std::cout << "Time elapsed: " << timer.result() << " ms\n";
                 if (outFile.is_open()) {
-                    outFile << timer.result() << "\n";
+                    outFile << "=== Prim's Algorithm ===\n";
+                    outFile << "Time: " << timer.result() << " ms\n";
                 }
             }
             else if (algorithm == 2) { // Kruskal's
-                std::cout << "\n=== Running Kruskal's algorithm ===\n";
+                std::cout << "\n--- Kruskal's Algorithm ---\n";
                 timer.reset();
                 timer.start();
                 graph.mst_kruskal();
                 timer.stop();
                 std::cout << "Time elapsed: " << timer.result() << " ms\n";
                 if (outFile.is_open()) {
-                    outFile << timer.result() << "\n";
+                    outFile << "=== Kruskal's Algorithm ===\n";
+                    outFile << "Time: " << timer.result() << " ms\n";
                 }
             }
             else {
@@ -138,44 +188,37 @@ int main(int argc, char* argv[]) {
             }
         }
         else if (problem == 1) { // Shortest path
-            // For shortest path, read order from file to determine end vertex
-            // Read first line to get order (number of vertices)
-            std::ifstream tempFile(inputFile);
-            int tempSize, tempOrder;
-            if (tempFile.is_open()) {
-                tempFile >> tempSize >> tempOrder;
-                tempFile.close();
-            }
-            else {
-                std::cerr << "Error: Could not read graph order from file.\n";
-                return 1;
-            }
-            
+            // For shortest path, use loaded graph order
             int startVertex = 0;
-            int endVertex = (tempOrder > 0) ? tempOrder - 1 : 0;
+            int endVertex = (graph.getOrder() > 0) ? graph.getOrder() - 1 : 0;
 
+            std::cout << "\n=== Shortest Path Solution ===\n";
+            std::cout << "Finding path from vertex " << startVertex << " to vertex " << endVertex << "\n";
+            
             if (algorithm == 0) { // All shortest path algorithms
-                std::cout << "\n=== Running Dijkstra's algorithm ===\n";
-                std::cout << "From vertex " << startVertex << " to vertex " << endVertex << "\n";
+                std::cout << "\n--- Dijkstra's Algorithm ---\n";
                 timer.reset();
                 timer.start();
                 graph.spp_dijkstra(startVertex, endVertex);
                 timer.stop();
                 std::cout << "Time elapsed: " << timer.result() << " ms\n";
                 if (outFile.is_open()) {
-                    outFile << "Dijkstra: " << timer.result() << " ms\n";
+                    outFile << "=== Dijkstra's Algorithm ===\n";
+                    outFile << "From vertex " << startVertex << " to vertex " << endVertex << "\n";
+                    outFile << "Time: " << timer.result() << " ms\n";
                 }
             }
             else if (algorithm == 1) { // Dijkstra's
-                std::cout << "\n=== Running Dijkstra's algorithm ===\n";
-                std::cout << "From vertex " << startVertex << " to vertex " << endVertex << "\n";
+                std::cout << "\n--- Dijkstra's Algorithm ---\n";
                 timer.reset();
                 timer.start();
                 graph.spp_dijkstra(startVertex, endVertex);
                 timer.stop();
                 std::cout << "Time elapsed: " << timer.result() << " ms\n";
                 if (outFile.is_open()) {
-                    outFile << timer.result() << "\n";
+                    outFile << "=== Dijkstra's Algorithm ===\n";
+                    outFile << "From vertex " << startVertex << " to vertex " << endVertex << "\n";
+                    outFile << "Time: " << timer.result() << " ms\n";
                 }
             }
             else {
@@ -226,6 +269,14 @@ int main(int argc, char* argv[]) {
         Timer timer;
         bool directed = (problem == 1); // Shortest path uses directed graphs
 
+        // Vectors to store timing results for each representation
+        std::vector<double> primTimesMatrix;
+        std::vector<double> primTimesList;
+        std::vector<double> kruskalTimesMatrix;
+        std::vector<double> kruskalTimesList;
+        std::vector<double> dijkstraTimesMatrix;
+        std::vector<double> dijkstraTimesList;
+
         for (int i = 0; i < count; i++) {
             Graph graph;
             graph.generateRandomGraph(size, density, directed);
@@ -234,16 +285,38 @@ int main(int argc, char* argv[]) {
                 if (algorithm == 0 || algorithm == 1) { // Prim's
                     timer.reset();
                     timer.start();
-                    graph.mst_prim();
+                    graph.mst_prim_matrix();
                     timer.stop();
-                    outFile << timer.result() << "\n";
+                    double resultMatrix = timer.result();
+                    primTimesMatrix.push_back(resultMatrix);
+                    outFile << "Prim_Matrix: " << resultMatrix << "\n";
+
+                    // Measure list representation
+                    timer.reset();
+                    timer.start();
+                    graph.mst_prim_list();
+                    timer.stop();
+                    double resultList = timer.result();
+                    primTimesList.push_back(resultList);
+                    outFile << "Prim_List: " << resultList << "\n";
                 }
                 if (algorithm == 0 || algorithm == 2) { // Kruskal's
                     timer.reset();
                     timer.start();
-                    graph.mst_kruskal();
+                    graph.mst_kruskal_matrix();
                     timer.stop();
-                    outFile << timer.result() << "\n";
+                    double resultMatrix = timer.result();
+                    kruskalTimesMatrix.push_back(resultMatrix);
+                    outFile << "Kruskal_Matrix: " << resultMatrix << "\n";
+
+                    // Measure list representation
+                    timer.reset();
+                    timer.start();
+                    graph.mst_kruskal_list();
+                    timer.stop();
+                    double resultList = timer.result();
+                    kruskalTimesList.push_back(resultList);
+                    outFile << "Kruskal_List: " << resultList << "\n";
                 }
             }
             else if (problem == 1) { // Shortest path
@@ -252,17 +325,135 @@ int main(int argc, char* argv[]) {
                 if (algorithm == 0 || algorithm == 1) { // Dijkstra's
                     timer.reset();
                     timer.start();
-                    graph.spp_dijkstra(startVertex, endVertex);
+                    graph.spp_dijkstra_matrix(startVertex, endVertex);
                     timer.stop();
-                    outFile << timer.result() << "\n";
+                    double resultMatrix = timer.result();
+                    dijkstraTimesMatrix.push_back(resultMatrix);
+                    outFile << "Dijkstra_Matrix: " << resultMatrix << "\n";
+
+                    // Measure list representation
+                    timer.reset();
+                    timer.start();
+                    graph.spp_dijkstra_list(startVertex, endVertex);
+                    timer.stop();
+                    double resultList = timer.result();
+                    dijkstraTimesList.push_back(resultList);
+                    outFile << "Dijkstra_List: " << resultList << "\n";
                 }
             }
 
             std::cout << "Completed test " << (i + 1) << "/" << count << "\n";
         }
 
+        // Calculate and write statistics
+        outFile << "\n=== STATISTICS ===\n";
+        std::cout << "\n=== STATISTICS ===\n";
+
+        // Helper function to calculate average
+        auto calculateAverage = [](const std::vector<double>& times) -> double {
+            if (times.empty()) return 0.0;
+            double sum = 0.0;
+            for (double t : times) {
+                sum += t;
+            }
+            return sum / times.size();
+        };
+
+        // Helper function to calculate standard deviation
+        auto calculateStdDev = [](const std::vector<double>& times, double avg) -> double {
+            if (times.empty() || times.size() == 1) return 0.0;
+            double sumSquaredDiff = 0.0;
+            for (double t : times) {
+                double diff = t - avg;
+                sumSquaredDiff += diff * diff;
+            }
+            return std::sqrt(sumSquaredDiff / times.size());
+        };
+
+        // Print statistics for each algorithm and representation
+        if (!primTimesMatrix.empty() || !primTimesList.empty()) {
+            outFile << "Prim's Algorithm:\n";
+            std::cout << "Prim's Algorithm:\n";
+            
+            if (!primTimesMatrix.empty()) {
+                double primAvgMatrix = calculateAverage(primTimesMatrix);
+                double primStdDevMatrix = calculateStdDev(primTimesMatrix, primAvgMatrix);
+                outFile << "  Matrix Representation:\n";
+                outFile << "    Average: " << std::fixed << std::setprecision(4) << primAvgMatrix << " ms\n";
+                outFile << "    Std Dev: " << std::fixed << std::setprecision(4) << primStdDevMatrix << " ms\n";
+                std::cout << "  Matrix Representation:\n";
+                std::cout << "    Average: " << std::fixed << std::setprecision(4) << primAvgMatrix << " ms\n";
+                std::cout << "    Std Dev: " << std::fixed << std::setprecision(4) << primStdDevMatrix << " ms\n";
+            }
+            
+            if (!primTimesList.empty()) {
+                double primAvgList = calculateAverage(primTimesList);
+                double primStdDevList = calculateStdDev(primTimesList, primAvgList);
+                outFile << "  List Representation:\n";
+                outFile << "    Average: " << std::fixed << std::setprecision(4) << primAvgList << " ms\n";
+                outFile << "    Std Dev: " << std::fixed << std::setprecision(4) << primStdDevList << " ms\n";
+                std::cout << "  List Representation:\n";
+                std::cout << "    Average: " << std::fixed << std::setprecision(4) << primAvgList << " ms\n";
+                std::cout << "    Std Dev: " << std::fixed << std::setprecision(4) << primStdDevList << " ms\n";
+            }
+        }
+
+        if (!kruskalTimesMatrix.empty() || !kruskalTimesList.empty()) {
+            outFile << "Kruskal's Algorithm:\n";
+            std::cout << "Kruskal's Algorithm:\n";
+            
+            if (!kruskalTimesMatrix.empty()) {
+                double kruskalAvgMatrix = calculateAverage(kruskalTimesMatrix);
+                double kruskalStdDevMatrix = calculateStdDev(kruskalTimesMatrix, kruskalAvgMatrix);
+                outFile << "  Matrix Representation:\n";
+                outFile << "    Average: " << std::fixed << std::setprecision(4) << kruskalAvgMatrix << " ms\n";
+                outFile << "    Std Dev: " << std::fixed << std::setprecision(4) << kruskalStdDevMatrix << " ms\n";
+                std::cout << "  Matrix Representation:\n";
+                std::cout << "    Average: " << std::fixed << std::setprecision(4) << kruskalAvgMatrix << " ms\n";
+                std::cout << "    Std Dev: " << std::fixed << std::setprecision(4) << kruskalStdDevMatrix << " ms\n";
+            }
+            
+            if (!kruskalTimesList.empty()) {
+                double kruskalAvgList = calculateAverage(kruskalTimesList);
+                double kruskalStdDevList = calculateStdDev(kruskalTimesList, kruskalAvgList);
+                outFile << "  List Representation:\n";
+                outFile << "    Average: " << std::fixed << std::setprecision(4) << kruskalAvgList << " ms\n";
+                outFile << "    Std Dev: " << std::fixed << std::setprecision(4) << kruskalStdDevList << " ms\n";
+                std::cout << "  List Representation:\n";
+                std::cout << "    Average: " << std::fixed << std::setprecision(4) << kruskalAvgList << " ms\n";
+                std::cout << "    Std Dev: " << std::fixed << std::setprecision(4) << kruskalStdDevList << " ms\n";
+            }
+        }
+
+        if (!dijkstraTimesMatrix.empty() || !dijkstraTimesList.empty()) {
+            outFile << "Dijkstra's Algorithm:\n";
+            std::cout << "Dijkstra's Algorithm:\n";
+            
+            if (!dijkstraTimesMatrix.empty()) {
+                double dijkstraAvgMatrix = calculateAverage(dijkstraTimesMatrix);
+                double dijkstraStdDevMatrix = calculateStdDev(dijkstraTimesMatrix, dijkstraAvgMatrix);
+                outFile << "  Matrix Representation:\n";
+                outFile << "    Average: " << std::fixed << std::setprecision(4) << dijkstraAvgMatrix << " ms\n";
+                outFile << "    Std Dev: " << std::fixed << std::setprecision(4) << dijkstraStdDevMatrix << " ms\n";
+                std::cout << "  Matrix Representation:\n";
+                std::cout << "    Average: " << std::fixed << std::setprecision(4) << dijkstraAvgMatrix << " ms\n";
+                std::cout << "    Std Dev: " << std::fixed << std::setprecision(4) << dijkstraStdDevMatrix << " ms\n";
+            }
+            
+            if (!dijkstraTimesList.empty()) {
+                double dijkstraAvgList = calculateAverage(dijkstraTimesList);
+                double dijkstraStdDevList = calculateStdDev(dijkstraTimesList, dijkstraAvgList);
+                outFile << "  List Representation:\n";
+                outFile << "    Average: " << std::fixed << std::setprecision(4) << dijkstraAvgList << " ms\n";
+                outFile << "    Std Dev: " << std::fixed << std::setprecision(4) << dijkstraStdDevList << " ms\n";
+                std::cout << "  List Representation:\n";
+                std::cout << "    Average: " << std::fixed << std::setprecision(4) << dijkstraAvgList << " ms\n";
+                std::cout << "    Std Dev: " << std::fixed << std::setprecision(4) << dijkstraStdDevList << " ms\n";
+            }
+        }
+
         outFile.close();
-        std::cout << "Benchmark complete. Results saved to: " << outputFile << "\n";
+        std::cout << "\nBenchmark complete. Results saved to: " << outputFile << "\n";
     }
     else {
         std::cerr << "Error: Invalid mode. Use --file, --test, or --help.\n";

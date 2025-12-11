@@ -25,7 +25,7 @@ void Graph::generateRandomGraph(int graph_order, int graph_density, bool directe
 
 	order = graph_order;
 
-	int minEdges = order - 1;	//min l. krawêdzi dla grafu spójnego
+	int minEdges = order - 1;	//min l. krawï¿½dzi dla grafu spï¿½jnego
 
 	size = ceil((float)graph_density * order * minEdges / 100);
 	if (!directed) {
@@ -37,13 +37,13 @@ void Graph::generateRandomGraph(int graph_order, int graph_density, bool directe
 		graph[i] = new Edge;
 	}
 
-	//przygotowanie tablicy odwiedzonych wierzcho³ków
+	//przygotowanie tablicy odwiedzonych wierzchoï¿½kï¿½w
 	int* visited = new int [order];
 	for (int i = 0; i < order; i++) {
 		visited[i] = 0;
 	}
 
-	//tworzenie losowej listy krawêdzi na wzór pliku
+	//tworzenie losowej listy krawï¿½dzi na wzï¿½r pliku
 	srand(time(NULL));
 	int next, previous, weight;
 
@@ -61,7 +61,7 @@ void Graph::generateRandomGraph(int graph_order, int graph_density, bool directe
 		visited[next] = 1;
 	}
 
-	//dope³nienie grafu do zadanej gêstoœci
+	//dopeï¿½nienie grafu do zadanej gï¿½stoï¿½ci
 	bool already_connected;
 	for (int i = minEdges; i < size; i++) {
 		already_connected = true;
@@ -109,16 +109,21 @@ void Graph::loadFromFile(std::string filename) {
 
 	myFile.open(filename);
 
-	if (myFile.is_open())
+	if (!myFile.is_open())
 	{
-		//usuniêcie poprzedniego grafu
+		std::cerr << "Error: Failed to open file: " << filename << std::endl;
+		return;
+	}
+
+	{
+		//usuniï¿½cie poprzedniego grafu
 		for (int i = 0; i < size; i++) {
 			delete graph[i];
 		}
-		delete graph;
+		delete[] graph;
 
-		//pobranie iloœci wartoœci do odczytania z pierwszej linijki pliku
-		myFile >> size >> order;	//size - krawêdzie, order - wierzcho³ki
+		//pobranie iloï¿½ci wartoï¿½ci do odczytania z pierwszej linijki pliku
+		myFile >> size >> order;	//size - krawï¿½dzie, order - wierzchoï¿½ki
 
 		//alokacja 
 		graph = new Edge * [size];
@@ -126,7 +131,7 @@ void Graph::loadFromFile(std::string filename) {
 			graph[i] = new Edge;
 		}
 
-		//wczytywanie krawêdzi
+		//wczytywanie krawï¿½dzi
 		for (int i = 0; i < size; i++) {
 			myFile >> v1 >> v2 >> weight;
 			add_edge(i, v1, v2, weight);
@@ -146,7 +151,7 @@ int Graph::minDensity(int graph_order, bool directed)
 	}
 }
 
-void Graph::mst_kruskal()	//wynikiem algorytmu jest lista krawêdzi
+void Graph::mst_kruskal()	//wynikiem algorytmu jest lista krawï¿½dzi
 {
 	List* mst;
 	std::cout << "Minimalne drzewo rozpinajace bedace wynikiem algorytmu Kruskala \n";
@@ -160,7 +165,7 @@ void Graph::mst_kruskal()	//wynikiem algorytmu jest lista krawêdzi
 	std::cout << "Calkowita waga MST: " << mst->sumWeight() << std::endl;
 }
 
-void Graph::mst_prim()	//wynikiem algorytmu jest lista krawêdzi
+void Graph::mst_prim()	//wynikiem algorytmu jest lista krawï¿½dzi
 {
 	List* mst;
 	std::cout << "Minimalne drzewo rozpinajace bedace wynikiem algorytmu Prima \n";
@@ -174,7 +179,7 @@ void Graph::mst_prim()	//wynikiem algorytmu jest lista krawêdzi
 	std::cout << "Calkowita waga MST: " << mst->sumWeight() << std::endl;
 }
 
-void Graph::spp_dijkstra(int vp, int vk)	//wynikiem algorytmu jest œcie¿ka i koszt
+void Graph::spp_dijkstra(int vp, int vk)	//wynikiem algorytmu jest ï¿½cieï¿½ka i koszt
 {
 	std::string spp;
 	std::cout << "Najkrotsza sciezka z \n" << vp << " do " << vk << "\n";
@@ -184,4 +189,35 @@ void Graph::spp_dijkstra(int vp, int vk)	//wynikiem algorytmu jest œcie¿ka i kos
 	std::cout << "\nZ reprezentacji listowej: \n";
 	spp = list_rep->spp_dijkstra(vp, vk);
 	std::cout << spp;
+}
+
+// Benchmarking methods - run algorithms on specific representation only (no output)
+void Graph::mst_prim_matrix()
+{
+	matrix_rep->mst_prim();
+}
+
+void Graph::mst_prim_list()
+{
+	list_rep->mst_prim();
+}
+
+void Graph::mst_kruskal_matrix()
+{
+	matrix_rep->mst_kruskal();
+}
+
+void Graph::mst_kruskal_list()
+{
+	list_rep->mst_kruskal();
+}
+
+void Graph::spp_dijkstra_matrix(int vp, int vk)
+{
+	matrix_rep->spp_dijkstra(vp, vk);
+}
+
+void Graph::spp_dijkstra_list(int vp, int vk)
+{
+	list_rep->spp_dijkstra(vp, vk);
 }
