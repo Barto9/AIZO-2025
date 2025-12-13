@@ -14,8 +14,8 @@ void showHelp() {
         << "        ./GraphAlgorithms --file <problem> <algorithm> <inputFile> [outputFile]\n"
         << "    <problem> Problem to solve (e.g. 0 - MST, 1 - shortest path)\n"
         << "    <algorithm> Algorithm for the problem\n"
-        << "        For MST (e.g. 0 - all, 1 - Prim's, ...)\n"
-        << "        For shortest (e.g. 0 - all, 1 - Dijkstra, ...)\n"
+        << "        For MST (e.g. 0 - all, 1 - Prim's, 2 - Kruskal's)\n"
+        << "        For shortest (1 - Dijkstra)\n"
         << "    <inputFile> Input file containing the graf.\n"
         << "    [outputFile] If provided, solved problem will be stored there.\n\n"
         << "BENCHMARK MODE:\n"
@@ -24,8 +24,8 @@ void showHelp() {
         << "                <outputFile>\n"
         << "    <problem> Problem to solve (e.g. 0 - MST, 1 - shortest path)\n"
         << "    <algorithm> Algorithm for the problem\n"
-        << "        For MST (e.g. 0 - all, 1 - Prim's, ...)\n"
-        << "        For shortest (e.g. 0 - all, 1 - Dijkstra, ...)\n"
+        << "        For MST (e.g. 0 - all, 1 - Prim's, 2 - Kruskal's)\n"
+        << "        For shortest (1 - Dijkstra)\n"
         << "    <size> Number of nodes.\n"
         << "    <density> Density of edges.\n"
         << "    <count> How many times test should be repeated (with graph regen).\n"
@@ -112,7 +112,6 @@ int main(int argc, char* argv[]) {
         }
         
         // Initialize graph representations (matrix and list)
-        // Determine if graph is directed based on problem type
         bool directed = (problem == 1); // Shortest path uses directed graphs
         graph.init(directed);
 
@@ -188,10 +187,21 @@ int main(int argc, char* argv[]) {
             }
         }
         else if (problem == 1) { // Shortest path
-            // For shortest path, use loaded graph order
-            int startVertex = 0;
-            int endVertex = (graph.getOrder() > 0) ? graph.getOrder() - 1 : 0;
-
+            int startVertex
+            int endVertex;
+            cout << "Do you want to add start and end vertex? (y/n)";
+            char answer;
+            cin >> answer;
+            if (answer == 'y') {
+                cout << "Enter start vertex: ";
+                cin >> startVertex;
+                cout << "Enter end vertex: ";
+                cin >> endVertex;
+            }
+            else {
+            startVertex = 0;
+            endVertex = (graph.getOrder() > 0) ? graph.getOrder() - 1 : 0;
+            }
             std::cout << "\n=== Shortest Path Solution ===\n";
             std::cout << "Finding path from vertex " << startVertex << " to vertex " << endVertex << "\n";
             
@@ -247,13 +257,11 @@ int main(int argc, char* argv[]) {
         int count = std::stoi(argv[6]);
         std::string outputFile = argv[7];
 
-        // Validate problem type
         if (problem != 0 && problem != 1) {
             std::cerr << "Error: Invalid problem type. Use 0 for MST, 1 for shortest path.\n";
             return 1;
         }
 
-        // Open output file
         std::ofstream outFile(outputFile);
         if (!outFile.is_open()) {
             std::cerr << "Error: Failed to open output file: " << outputFile << "\n";
@@ -269,7 +277,7 @@ int main(int argc, char* argv[]) {
         Timer timer;
         bool directed = (problem == 1); // Shortest path uses directed graphs
 
-        // Vectors to store timing results for each representation
+        // Uzywam tutaj vectorow do przechowywania czasow dla kazdego algorytmu i reprezentacji
         std::vector<double> primTimesMatrix;
         std::vector<double> primTimesList;
         std::vector<double> kruskalTimesMatrix;
@@ -291,7 +299,6 @@ int main(int argc, char* argv[]) {
                     primTimesMatrix.push_back(resultMatrix);
                     outFile << "Prim_Matrix: " << resultMatrix << "\n";
 
-                    // Measure list representation
                     timer.reset();
                     timer.start();
                     graph.mst_prim_list();
@@ -309,7 +316,6 @@ int main(int argc, char* argv[]) {
                     kruskalTimesMatrix.push_back(resultMatrix);
                     outFile << "Kruskal_Matrix: " << resultMatrix << "\n";
 
-                    // Measure list representation
                     timer.reset();
                     timer.start();
                     graph.mst_kruskal_list();
@@ -331,7 +337,6 @@ int main(int argc, char* argv[]) {
                     dijkstraTimesMatrix.push_back(resultMatrix);
                     outFile << "Dijkstra_Matrix: " << resultMatrix << "\n";
 
-                    // Measure list representation
                     timer.reset();
                     timer.start();
                     graph.spp_dijkstra_list(startVertex, endVertex);
@@ -345,7 +350,6 @@ int main(int argc, char* argv[]) {
             std::cout << "Completed test " << (i + 1) << "/" << count << "\n";
         }
 
-        // Calculate and write statistics
         outFile << "\n=== STATISTICS ===\n";
         std::cout << "\n=== STATISTICS ===\n";
 

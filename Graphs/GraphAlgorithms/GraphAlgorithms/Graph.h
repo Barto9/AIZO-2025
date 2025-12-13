@@ -40,15 +40,13 @@ public:
 	void mst_prim();
 	void spp_dijkstra(int vp, int vk);
 
-	// Methods for benchmarking - run algorithms on specific representation only
-	void mst_prim_matrix();  // Prim's on matrix representation only
-	void mst_prim_list();    // Prim's on list representation only
-	void mst_kruskal_matrix(); // Kruskal's on matrix representation only
-	void mst_kruskal_list();   // Kruskal's on list representation only
-	void spp_dijkstra_matrix(int vp, int vk); // Dijkstra's on matrix representation only
-	void spp_dijkstra_list(int vp, int vk);  // Dijkstra's on list representation only
+	void mst_prim_matrix();
+	void mst_prim_list();
+	void mst_kruskal_matrix();
+	void mst_kruskal_list();
+	void spp_dijkstra_matrix(int vp, int vk);
+	void spp_dijkstra_list(int vp, int vk);
 
-	// Getters
 	int getSize() const { return size; }
 	int getOrder() const { return order; }
 
