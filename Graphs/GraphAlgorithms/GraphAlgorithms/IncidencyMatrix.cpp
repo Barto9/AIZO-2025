@@ -106,43 +106,53 @@ List* IncidencyMatrix::mst_prim()
 {
 	List* result = new List();
 
-	//tablica pamiêtaj¹ca odwiedzone wierzcho³ki;
-	bool* visited = new bool[graph_order];
-	for (int i = 0; i < graph_order; i++) {
-		visited[i] = false;
-	}
+	bool* visited = new bool[graph_order] {false};
+	int visitedCount = 0;
 
-	int currentNode = 0;	//wierzcho³ek pocz¹tkowy 0 !
+	int currentNode = 0;
 
 	EdgeHeap* minEdgeHeap = new EdgeHeap();
-	Edge* e = new Edge(0, 0, 0);
-	do {
-		if (!visited[currentNode]) {
-			result->push(e);	//dodanie krawêdzi, któr¹ doszliœmy do currentNode do rozwi¹zania (krawêdzie o wadze 0 s¹ ignorowanê przez metodê List::push)
-			for (int i = 0; i < graph_size; i++) {	//przejœcie po macierzy w poszukiwaniu krawêdzi incydentnych z currentNode
-				if (incMatrix[currentNode][i] > 0) {
-					for (int j = 0; j < graph_order; j++) {	//znalezienie drugiego wierzcho³ka
-						if (j != currentNode && incMatrix[j][i] > 0) {
-							e = new Edge;
-							e->v1 = currentNode;
-							e->v2 = j;
-							e->weight = incMatrix[j][i];
-							minEdgeHeap->push(e);
-							break;
-						}
+
+	visited[currentNode] = true;
+	visitedCount++;
+
+	while (visitedCount < graph_order)
+	{
+		for (int i = 0; i < graph_size; i++)
+		{
+			if (incMatrix[currentNode][i] > 0)
+			{
+				for (int j = 0; j < graph_order; j++)
+				{
+					if (j != currentNode && incMatrix[j][i] > 0 && !visited[j])
+					{
+						Edge* e = new Edge();
+						e->v1 = currentNode;
+						e->v2 = j;
+						e->weight = incMatrix[j][i];
+						minEdgeHeap->push(e);
+						break;
 					}
 				}
 			}
-			visited[currentNode] = true;
 		}
 
-		e = minEdgeHeap->pop();
+		Edge* e;
+		do {
+			e = minEdgeHeap->pop();
+		} while (visited[e->v2]);
+
+		result->push(e);
+
 		currentNode = e->v2;
+		visited[currentNode] = true;
+		visitedCount++;
+	}
 
-	} while (minEdgeHeap->heap_length > 0);
-
+	delete[] visited;
 	return result;
 }
+
 
 std::string IncidencyMatrix::spp_dijkstra(int vp, int vk)
 {

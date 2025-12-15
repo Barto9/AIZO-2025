@@ -123,48 +123,51 @@ List* AdjacencyList::mst_kruskal() {
 
 	return result;
 }
-List* AdjacencyList::mst_prim() {
-
+List* AdjacencyList::mst_prim()
+{
 	List* result = new List();
 
-	//tablica pamiêtaj¹ca odwiedzone wierzcho³ki;
-	bool* visited = new bool[graph_order];
-	for (int i = 0; i < graph_order; i++) {
-		visited[i] = false;
-	}
+	bool* visited = new bool[graph_order] {false};
+	int visitedCount = 0;
 
-	int currentNode = 0;	//wierzcho³ek pocz¹tkowy 0 !
-
+	int currentNode = 0;
 	EdgeHeap* minEdgeHeap = new EdgeHeap();
-	Edge* e = new Edge(0,0,0);
-	ListNode* holder;
 
-	do {
-		if (!visited[currentNode]) {	//jeœli wierzcho³ek ju¿ by³ odwiedzony zostaje odrzucony
-			result->push(e);	//krawêdŸ wybrana w poprzednim przebiegu pêtli zostaje dodana do rozwi¹zania (krawêdzie o wadze 0 s¹ ignorowanê przez metodê List::push)
-			if (adjList[currentNode]->next == nullptr) {	// w przypadku, gdy dany wierzcho³ek nie ma krawêdzi do dodania jest pomijany
-				currentNode++;
-				continue;
-			}
-			holder = adjList[currentNode];
-			while (holder->next != nullptr) {	//dodanie wszystkich krawêdzi odwiedzanego wierzcho³ka do kolejki
-				holder = holder->next;
-				e = new Edge;
+	visited[currentNode] = true;
+	visitedCount++;
+
+	while (visitedCount < graph_order)
+	{
+		ListNode* holder = adjList[currentNode]->next;
+		while (holder != nullptr)
+		{
+			if (!visited[holder->id])
+			{
+				Edge* e = new Edge;
 				e->v1 = currentNode;
 				e->v2 = holder->id;
 				e->weight = holder->weight;
 				minEdgeHeap->push(e);
 			}
-			visited[currentNode] = true;
+			holder = holder->next;
 		}
 
-		e = minEdgeHeap->pop();	//wybór krawêdzi incydentnej z ju¿ odwiedzonymi wierzcho³kami o minimalnej wadze
+		Edge* e;
+		do {
+			e = minEdgeHeap->pop();
+		} while (visited[e->v2]);
+
+		result->push(e);
+
 		currentNode = e->v2;
+		visited[currentNode] = true;
+		visitedCount++;
+	}
 
-	} while (minEdgeHeap->heap_length > 0);
-
+	delete[] visited;
 	return result;
 }
+
 
 std::string AdjacencyList::spp_dijkstra(int vp, int vk)
 {
