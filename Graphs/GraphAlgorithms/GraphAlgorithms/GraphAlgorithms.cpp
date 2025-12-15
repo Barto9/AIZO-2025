@@ -187,16 +187,16 @@ int main(int argc, char* argv[]) {
             }
         }
         else if (problem == 1) { // Shortest path
-            int startVertex
+            int startVertex;
             int endVertex;
-            cout << "Do you want to add start and end vertex? (y/n)";
+            std::cout << "Do you want to add start and end vertex? (y/n)";
             char answer;
-            cin >> answer;
+            std::cin >> answer;
             if (answer == 'y') {
-                cout << "Enter start vertex: ";
-                cin >> startVertex;
-                cout << "Enter end vertex: ";
-                cin >> endVertex;
+                std::cout << "Enter start vertex: ";
+                std::cin >> startVertex;
+                std::cout << "Enter end vertex: ";
+                std::cin >> endVertex;
             }
             else {
             startVertex = 0;
